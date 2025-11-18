@@ -1,0 +1,7 @@
+{
+  "name": "frontline-dashboard",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
