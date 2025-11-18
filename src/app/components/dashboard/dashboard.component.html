@@ -1,0 +1,153 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Frontline Dashboard</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleFilters()">
+        <ion-icon name="filter-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="logout()">
+        <ion-icon name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Pull to refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Overdue Statistics Card -->
+  <ion-card color="warning" *ngIf="overdueStats$ | async as stats">
+    <ion-card-header>
+      <ion-card-title>Overdue Clients</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="6">
+            <div class="stat-value">{{ stats.count }}</div>
+            <div class="stat-label">Overdue</div>
+          </ion-col>
+          <ion-col size="6">
+            <div class="stat-value">{{ stats.percentage | number:'1.1-1' }}%</div>
+            <div class="stat-label">of Total</div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+      <ion-button 
+        expand="block" 
+        fill="clear" 
+        color="dark"
+        (click)="toggleOverdueFilter()">
+        {{ filterState.showOverdueOnly ? 'Show All' : 'Show Only Overdue' }}
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Search Bar -->
+  <ion-searchbar 
+    placeholder="Search by name, location, or manager"
+    [value]="filterState.searchTerm"
+    (ionChange)="onSearchChange($event)"
+    animated="true">
+  </ion-searchbar>
+
+  <!-- Filter Panel -->
+  <ion-card *ngIf="showFilters">
+    <ion-card-header>
+      <ion-card-title>Filters</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label>Manager</ion-label>
+        <ion-select 
+          [value]="filterState.selectedManager"
+          (ionChange)="onManagerChange($event)"
+          placeholder="All">
+          <ion-select-option [value]="null">All</ion-select-option>
+          <ion-select-option *ngFor="let manager of managers$ | async" [value]="manager">
+            {{ manager }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>Region</ion-label>
+        <ion-segment [value]="filterState.selectedRegion" (ionChange)="onRegionChange($event)">
+          <ion-segment-button value="All">
+            <ion-label>All</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="Inland">
+            <ion-label>Inland</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="Coastal">
+            <ion-label>Coastal</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>Province</ion-label>
+        <ion-select 
+          [value]="filterState.selectedProvince"
+          (ionChange)="onProvinceChange($event)"
+          placeholder="All">
+          <ion-select-option [value]="null">All</ion-select-option>
+          <ion-select-option *ngFor="let province of provinces$ | async" [value]="province">
+            {{ province }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-button expand="block" (click)="clearFilters()">Clear Filters</ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Client Cards -->
+  <ion-list>
+    <ion-card 
+      *ngFor="let company of filteredCompanies$ | async" 
+      [ngClass]="{ 'overdue-card': company.isOverdue }"
+      (click)="toggleCard(company.companyId)">
+      
+      <ion-card-header>
+        <ion-card-title>{{ company.tradingName }}</ion-card-title>
+        <ion-card-subtitle>
+          <ion-icon name="location-outline"></ion-icon>
+          {{ company.location.suburb }}, {{ company.location.city }}
+        </ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content *ngIf="isCardExpanded(company.companyId)">
+        <ion-item>
+          <ion-icon name="person-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h3>Manager</h3>
+            <p>{{ company.accountManager }}</p>
+          </ion-label>
+        </ion-item>
+
+        <ion-item>
+          <ion-icon name="calendar-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h3>Last Visit</h3>
+            <p>{{ formatDate(company.parsedDates.lastSiteVisit) }}</p>
+            <p *ngIf="company.isOverdue" class="overdue-text">
+              {{ company.daysOverdue }} days overdue
+            </p>
+          </ion-label>
+        </ion-item>
+
+        <ion-item>
+          <ion-icon name="map-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h3>Location</h3>
+            <p>{{ company.location.province }} ({{ company.location.region }})</p>
+          </ion-label>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+  </ion-list>
+</ion-content>

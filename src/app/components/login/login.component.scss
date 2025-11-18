@@ -1,0 +1,117 @@
+.login-content {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.login-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  
+  .logo-section {
+    text-align: center;
+    margin-bottom: 30px;
+    color: white;
+    
+    .app-logo {
+      font-size: 80px;
+      margin-bottom: 10px;
+      animation: pulse 2s infinite;
+    }
+    
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 10px 0;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    p {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+  }
+  
+  .login-card {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    
+    ion-card-content {
+      padding: 24px;
+      
+      form {
+        ion-item {
+          --background: transparent;
+          --border-color: var(--ion-color-medium);
+          margin-bottom: 16px;
+          
+          ion-label {
+            font-weight: 500;
+          }
+          
+          ion-input {
+            --padding-top: 12px;
+            --padding-bottom: 12px;
+          }
+        }
+        
+        .error-message {
+          color: var(--ion-color-danger);
+          font-size: 0.85rem;
+          margin-top: -12px;
+          margin-bottom: 12px;
+          margin-left: 16px;
+        }
+        
+        .login-button {
+          margin-top: 24px;
+          height: 48px;
+          font-weight: 600;
+          font-size: 1rem;
+          --border-radius: 8px;
+        }
+      }
+    }
+  }
+  
+  .footer {
+    margin-top: 30px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    opacity: 0.8;
+    font-size: 0.85rem;
+    
+    ion-icon {
+      font-size: 1rem;
+    }
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// Dark mode
+@media (prefers-color-scheme: dark) {
+  .login-content {
+    --background: linear-gradient(135deg, #434343 0%, #000000 100%);
+  }
+  
+  .login-card {
+    --background: #2a2a2a;
+  }
+}
