@@ -2,17 +2,49 @@
   <div class="login-container">
     <div class="logo-section">
       <ion-icon name="analytics-outline" class="app-logo"></ion-icon>
+      <style>
+        .location-toggle-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 3rem;
+          width: 100%;
+        }
+
+        .location-toggle-items
+        {
+          display: flex;
+          justify-content: center;
+        }
+
+        .toggle-label {
+          font-size: 0.9em;
+          color: var(--ion-color-medium);
+        }
+
+        .location-toggle {
+          /*margin: 0 0.5rem;*/
+          width: 4rem;
+        }
+
+        .toggle-wrapper {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+      </style>
       <h1>Frontline Dashboard</h1>
       <p>VMG Software Solutions</p>
     </div>
 
     <ion-card class="login-card">
       <ion-card-content>
-        <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
-          <ion-item>
+        <form [formGroup]="loginForm" (ngSubmit)="onLogin()" (keydown.enter)="$event.preventDefault(); onLogin()"
+              autocomplete="off">
+        <ion-item>
             <ion-label position="floating">Username</ion-label>
-            <ion-input 
-              type="text" 
+            <ion-input
+              type="text"
               formControlName="username"
               autocomplete="username"
               required>
@@ -24,15 +56,15 @@
 
           <ion-item>
             <ion-label position="floating">Password</ion-label>
-            <ion-input 
+            <ion-input
               [type]="showPassword ? 'text' : 'password'"
               formControlName="password"
               autocomplete="current-password"
               required>
             </ion-input>
-            <ion-button 
-              fill="clear" 
-              slot="end" 
+            <ion-button
+              fill="clear"
+              slot="end"
               (click)="togglePasswordVisibility()"
               tabindex="-1">
               <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
@@ -43,9 +75,19 @@
             <span *ngIf="password?.errors?.['minlength']">Password must be at least 4 characters</span>
           </div>
 
-          <ion-button 
-            expand="block" 
-            type="submit" 
+          <ion-item lines="none" class="ion-text-center">
+            <div class="location-toggle-container">
+            <ion-label class="toggle-label">In Office</ion-label>
+              <div class="toggle-wrapper">
+                <ion-toggle (click)="toggleConnectionMode()" class="location-toggle"></ion-toggle>
+              </div>
+              <ion-label class="toggle-label">External</ion-label>
+            </div>
+          </ion-item>
+
+          <ion-button
+            expand="block"
+            type="submit"
             [disabled]="loginForm.invalid"
             class="login-button">
             Login
@@ -56,7 +98,7 @@
     </ion-card>
 
     <div class="footer">
-      <p>Secure Connection</p>
+      <p>Contact Stevie Or Alan about issues with this app 😉</p>
       <ion-icon name="lock-closed-outline"></ion-icon>
     </div>
   </div>

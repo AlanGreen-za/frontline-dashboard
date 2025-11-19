@@ -17,6 +17,7 @@ import { LoginRequest } from '../../interfaces/frontline.interface';
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   showPassword = false;
+  IsInternal:boolean = true;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -27,16 +28,21 @@ export class LoginComponent implements OnInit {
   ) {
     this.loginForm = this.formBuilder.group({
       username: ['', [Validators.required]],
-      password: ['', [Validators.required, Validators.minLength(4)]]
+      password: ['', [Validators.required, Validators.minLength(3)]]
     });
   }
 
   ngOnInit() {
-    this.authService.isAuthenticated$.subscribe(isAuth => {
+    this.authService.checkAuthStatus().then(r => this.authService.isAuthenticated$.subscribe(isAuth => {
       if (isAuth) {
         this.router.navigate(['/dashboard']);
       }
-    });
+    })
+    );
+  }
+
+  protected toggleConnectionMode() {
+    this.IsInternal = !this.IsInternal;
   }
 
   async onLogin() {
@@ -52,7 +58,7 @@ export class LoginComponent implements OnInit {
     await loading.present();
 
     const credentials: LoginRequest = this.loginForm.value;
-
+    this.authService.IsInternal = this.IsInternal
     this.authService.login(credentials).subscribe({
       next: async (response) => {
         await loading.dismiss();
@@ -76,7 +82,7 @@ export class LoginComponent implements OnInit {
 
   private async showErrorAlert(error: any) {
     let message = 'Login failed. Please try again.';
-    
+
     if (error.status === 401) {
       message = 'Invalid username or password.';
     } else if (error.status === 0) {

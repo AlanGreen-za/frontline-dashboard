@@ -9,13 +9,19 @@ import { LoginRequest, LoginResponse } from '../interfaces/frontline.interface';
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly API_BASE = 'https://office.vmgsoftware.co.za:10011';
+
   private readonly TOKEN_KEY = 'auth_token';
   private readonly USER_KEY = 'user_data';
-  
+
+  private readonly INTERNAL_API_BASE = 'https://192.168.1.13:10011';
+  private readonly EXTERNAL_API_BASE = 'https://office.vmgsoftware.co.za:10011';
+  public IsInternal:boolean = true;
+  private readonly VMG_LAN_PREFIX = '192.168.1.';
+  private API_BASE = this.INTERNAL_API_BASE;
+
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
-  
+
   private currentUserSubject = new BehaviorSubject<any>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -24,6 +30,7 @@ export class AuthService {
   }
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
+    this.API_BASE = this.IsInternal ? this.INTERNAL_API_BASE : this.EXTERNAL_API_BASE;
     const headers = new HttpHeaders({
       'Content-Type': 'application/json'
     });
@@ -35,7 +42,7 @@ export class AuthService {
         userId: 'user-001',
         username: credentials.username
       };
-      
+
       return from(Promise.all([
         Preferences.set({ key: this.TOKEN_KEY, value: mockResponse.token }),
         Preferences.set({ key: this.USER_KEY, value: JSON.stringify({
@@ -110,11 +117,11 @@ export class AuthService {
     );
   }
 
-  private async checkAuthStatus(): Promise<void> {
+  public async checkAuthStatus(): Promise<void> {
     try {
       const { value: token } = await Preferences.get({ key: this.TOKEN_KEY });
       const { value: userData } = await Preferences.get({ key: this.USER_KEY });
-      
+
       if (token) {
         this.isAuthenticatedSubject.next(true);
         if (userData) {

@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, AlertController, LoadingController } from '@ionic/angular';
+import {Router} from '@angular/router';
 import { FrontlineService } from '../../services/frontline.service';
 import { AuthService } from '../../services/auth.service';
 import { ProcessedCompany, FilterState } from '../../interfaces/frontline.interface';
@@ -46,7 +47,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private frontlineService: FrontlineService,
     private authService: AuthService,
     private alertController: AlertController,
-    private loadingController: LoadingController
+    private loadingController: LoadingController,
+    private router: Router
   ) {
     // Initialize observables
     this.filteredCompanies$ = this.frontlineService.filteredCompanies$;
@@ -57,6 +59,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
+    this.authService.checkAuthStatus().then(r =>  this.authService.isAuthenticated$.subscribe(isAuth => {
+        if (!isAuth) {
+          this.router.navigate(['/login']);
+        }
+    }));
+
     await this.loadData();
   }
 
@@ -150,10 +158,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   formatDate(date: Date | undefined): string {
     if (!date) return 'N/A';
-    return new Intl.DateTimeFormat('en-ZA', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    return new Intl.DateTimeFormat('en-ZA', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
     }).format(date);
   }
 

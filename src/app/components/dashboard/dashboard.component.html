@@ -1,12 +1,19 @@
 <ion-header>
   <ion-toolbar color="primary">
+    <style>
+      .logout-button {
+        margin-right: 8px;
+        padding: 8px;
+      }
+    </style>
     <ion-title>Frontline Dashboard</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="toggleFilters()">
         <ion-icon name="filter-outline"></ion-icon>
       </ion-button>
-      <ion-button (click)="logout()">
-        <ion-icon name="log-out-outline"></ion-icon>
+      <ion-button (click)="logout()" color="danger" class="logout-button">
+        <ion-icon name="log-out-outline" size="large" slot="start"></ion-icon>
+        Logout
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -36,9 +43,9 @@
           </ion-col>
         </ion-row>
       </ion-grid>
-      <ion-button 
-        expand="block" 
-        fill="clear" 
+      <ion-button
+        expand="block"
+        fill="clear"
         color="dark"
         (click)="toggleOverdueFilter()">
         {{ filterState.showOverdueOnly ? 'Show All' : 'Show Only Overdue' }}
@@ -47,7 +54,7 @@
   </ion-card>
 
   <!-- Search Bar -->
-  <ion-searchbar 
+  <ion-searchbar
     placeholder="Search by name, location, or manager"
     [value]="filterState.searchTerm"
     (ionChange)="onSearchChange($event)"
@@ -62,7 +69,7 @@
     <ion-card-content>
       <ion-item>
         <ion-label>Manager</ion-label>
-        <ion-select 
+        <ion-select
           [value]="filterState.selectedManager"
           (ionChange)="onManagerChange($event)"
           placeholder="All">
@@ -90,7 +97,7 @@
 
       <ion-item>
         <ion-label>Province</ion-label>
-        <ion-select 
+        <ion-select
           [value]="filterState.selectedProvince"
           (ionChange)="onProvinceChange($event)"
           placeholder="All">
@@ -107,11 +114,11 @@
 
   <!-- Client Cards -->
   <ion-list>
-    <ion-card 
-      *ngFor="let company of filteredCompanies$ | async" 
+    <ion-card
+      *ngFor="let company of filteredCompanies$ | async"
       [ngClass]="{ 'overdue-card': company.isOverdue }"
       (click)="toggleCard(company.companyId)">
-      
+
       <ion-card-header>
         <ion-card-title>{{ company.tradingName }}</ion-card-title>
         <ion-card-subtitle>
