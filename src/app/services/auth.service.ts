@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Preferences } from '@capacitor/preferences';
+import { LoginRequest } from '../interfaces/frontline.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -12,12 +13,13 @@ export class AuthService {
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
 
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
+  public IsInternal: boolean = true;
 
   constructor(private http: HttpClient) {
-    this.checkToken();
+    this.checkAuthStatus();
   }
 
-  async checkToken() {
+  async checkAuthStatus() {
     const { value } = await Preferences.get({ key: this.tokenKey });
     if (value) {
       this.isAuthenticatedSubject.next(true);
@@ -26,8 +28,8 @@ export class AuthService {
     }
   }
 
-  login(username: string, password: string): Observable<any> {
-    return this.http.post(this.apiUrl, { username, password }, { responseType: 'text' }).pipe(
+  login(credentials: LoginRequest): Observable<any> {
+    return this.http.post(this.apiUrl, credentials, { responseType: 'text' }).pipe(
       tap(async (token) => {
         await Preferences.set({ key: this.tokenKey, value: token });
         this.isAuthenticatedSubject.next(true);

@@ -84,7 +84,7 @@ export class DashboardComponent implements OnInit {
 
   loadData() {
     // First try to login (hardcoded for demo as per request, but ideally should be a login screen)
-    this.authService.login('MyAutmomanUsername', 'MyAutomanPassword').subscribe({
+    this.authService.login({ username: 'MyAutmomanUsername', password: 'MyAutomanPassword' }).subscribe({
       next: () => {
         this.dataService.getClientData().subscribe({
           next: (data) => {

@@ -117,42 +117,14 @@
     <div class="client-list">
       <ion-card *ngFor="let company of filteredCompanies$ | async" class="client-card"
         (click)="toggleCard(company.companyId)">
+        <!-- Client Details Header -->
+        <div class="section-header">Client Details</div>
 
-        <ion-card-header>
-          <div class="card-header-content">
-            <ion-card-title>{{ company.tradingName }}</ion-card-title>
-            <ion-icon name="chevron-down-outline" [class.rotated]="isCardExpanded(company.companyId)"></ion-icon>
-          </div>
-          <ion-card-subtitle>
-            {{ company.location.suburb }}, {{ company.location.province }}
-          </ion-card-subtitle>
-        </ion-card-header>
-
-        <ion-card-content *ngIf="isCardExpanded(company.companyId)">
-          <div class="expanded-content">
-            <!-- Client Details Header -->
-            <div class="section-header">Client Details</div>
-
-            <ion-grid>
-              <ion-row>
-                <ion-col size="12" size-md="6">
-                  <div class="detail-row">
-                    <span class="label">Manager:</span>
-                    <span class="value">{{ company.accountManager }}</span>
-                  </div>
-                  <div class="detail-row">
-                    <span class="label">Start Date:</span>
-                    <span class="value">1 May 2009</span> <!-- Placeholder -->
-                  </div>
-                  <div class="detail-row">
-                    <span class="label">Last Visit:</span>
-                    <span class="value">{{ formatDate(company.parsedDates.lastSiteVisit) }}</span>
-                  </div>
-                  <div class="detail-row">
-                    <span class="label">Payment:</span>
-                    <span class="value">NetCash</span> <!-- Placeholder -->
-                  </div>
-                </ion-col>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <div class="detail-row">
+                <span class="label">Manager:</span>
 
                 <ion-col size="12" size-md="6">
                   <div class="section-header small">Active Products</div>
@@ -167,203 +139,173 @@
                     </div>
                   </div>
                 </ion-col>
-              </ion-row>
-            </ion-grid>
-          </div>
-        </ion-card-content>
-      </ion-card>
+          </ion-row>
+        </ion-grid>
     </div>
+    </ion-card-content>
+    </ion-card>
+  </div>
 
-    <!-- Stats Footer -->
-    <ion-card class="stats-card" *ngIf="overdueStats$ | async as stats">
-      <ion-card-content>
-        <ion-header class="ion-no-border">
-          <ion-toolbar color="white">
-            <ion-title color="dark">Frontline Explorer</ion-title>
-            <ion-buttons slot="end">
-              <ion-button (click)="toggleMap()">
-                <ion-icon [name]="showMap ? 'list-outline' : 'map-outline'"></ion-icon>
-              </ion-button>
-              <ion-button (click)="toggleFilters()">
-                <ion-icon name="filter-outline"></ion-icon>
-              </ion-button>
-              <ion-button (click)="logout()" color="danger" class="logout-button">
-                <ion-icon name="log-out-outline" size="large" slot="start"></ion-icon>
-                Logout
-              </ion-button>
-            </ion-buttons>
-          </ion-toolbar>
-        </ion-header>
+  <!-- Stats Footer -->
+  <ion-card class="stats-card" *ngIf="overdueStats$ | async as stats">
+    <ion-card-content>
+      <ion-header class="ion-no-border">
+        <ion-toolbar color="white">
+          <ion-title color="dark">Frontline Explorer</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="toggleMap()">
+              <ion-icon [name]="showMap ? 'list-outline' : 'map-outline'"></ion-icon>
+            </ion-button>
+            <ion-button (click)="toggleFilters()">
+              <ion-icon name="filter-outline"></ion-icon>
+            </ion-button>
+            <ion-button (click)="logout()" color="danger" class="logout-button">
+              <ion-icon name="log-out-outline" size="large" slot="start"></ion-icon>
+              Logout
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
 
-        <ion-content class="ion-padding">
+      <ion-content class="ion-padding">
 
-          <!-- Map View -->
-          <div class="map-wrapper" *ngIf="showMap">
-            <app-map-view [clients]="filteredCompanies$ | async"></app-map-view>
+        <!-- Map View -->
+        <div class="map-wrapper" *ngIf="showMap">
+          <app-map-view [clients]="filteredCompanies$ | async"></app-map-view>
+        </div>
+
+        <div [class.hidden]="showMap">
+
+          <!-- Filter Panel -->
+          <div class="filter-section">
+            <!-- Date Range Filter (Placeholder to match design) -->
+            <div class="filter-group">
+              <div class="filter-header">
+                Filter by Date Range
+              </div>
+              <div class="filter-content">
+                <ion-grid>
+                  <ion-row>
+                    <ion-col size="12">
+                      <div class="filter-options">
+                        <span class="filter-label">Filter on:</span>
+                        <ion-button size="small" fill="outline" color="medium">Last Visit</ion-button>
+                        <ion-button size="small" fill="clear" color="medium">Start Date</ion-button>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col size="6">
+                      <ion-label position="stacked">From</ion-label>
+                      <ion-item lines="none" class="date-input">
+                        <ion-input placeholder="Select date"></ion-input>
+                        <ion-icon name="calendar-outline" slot="end"></ion-icon>
+                      </ion-item>
+                    </ion-col>
+                    <ion-col size="6">
+                      <ion-label position="stacked">To</ion-label>
+                      <ion-item lines="none" class="date-input">
+                        <ion-input placeholder="Select date"></ion-input>
+                        <ion-icon name="calendar-outline" slot="end"></ion-icon>
+                      </ion-item>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </div>
+            </div>
+
+            <!-- Manager Filter -->
+            <div class="filter-group">
+              <div class="filter-header">
+                Filter by Account Manager
+              </div>
+              <div class="filter-content">
+                <div class="chip-container">
+                  <ion-chip *ngFor="let manager of managers$ | async"
+                    [outline]="filterState.selectedManager !== manager"
+                    [color]="filterState.selectedManager === manager ? 'primary' : 'medium'"
+                    (click)="onManagerChange({detail: {value: manager}})">
+                    <ion-label>{{ manager }}</ion-label>
+                    <ion-badge *ngIf="filterState.selectedManager !== manager" color="light">12</ion-badge>
+                  </ion-chip>
+                </div>
+              </div>
+            </div>
+
+            <!-- Region Filter -->
+            <div class="filter-group">
+              <div class="filter-header">
+                Filter by Region
+              </div>
+              <div class="filter-content">
+                <ion-segment [value]="filterState.selectedRegion" (ionChange)="onRegionChange($event)" mode="ios">
+                  <ion-segment-button value="All">
+                    <ion-label>ALL</ion-label>
+                  </ion-segment-button>
+                  <ion-segment-button value="Inland">
+                    <ion-label>INLAND</ion-label>
+                  </ion-segment-button>
+                  <ion-segment-button value="Coastal">
+                    <ion-label>COASTAL</ion-label>
+                  </ion-segment-button>
+                </ion-segment>
+
+                <div class="province-chips ion-margin-top">
+                  <ion-chip *ngFor="let province of provinces$ | async"
+                    [outline]="filterState.selectedProvince !== province"
+                    (click)="onProvinceChange({detail: {value: province}})">
+                    <ion-label>{{ province }}</ion-label>
+                  </ion-chip>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div [class.hidden]="showMap">
+          <!-- Search Bar -->
+          <ion-searchbar placeholder="Search by name, province, city, suburb, or manager..."
+            [value]="filterState.searchTerm" (ionChange)="onSearchChange($event)" class="custom-searchbar">
+          </ion-searchbar>
 
-            <!-- Filter Panel -->
-            <div class="filter-section">
-              <!-- Date Range Filter (Placeholder to match design) -->
-              <div class="filter-group">
-                <div class="filter-header">
-                  Filter by Date Range
-                </div>
-                <div class="filter-content">
-                  <ion-grid>
-                    <ion-row>
-                      <ion-col size="12">
-                        <div class="filter-options">
-                          <span class="filter-label">Filter on:</span>
-                          <ion-button size="small" fill="outline" color="medium">Last Visit</ion-button>
-                          <ion-button size="small" fill="clear" color="medium">Start Date</ion-button>
+          <!-- Client Cards -->
+          <div class="client-list">
+            <ion-card *ngFor="let company of filteredCompanies$ | async" class="client-card"
+              (click)="toggleCard(company.companyId)">
+
+
+              <ion-grid>
+                <ion-row>
+                  <ion-col size="12" size-md="6">
+                    <div class="detail-row">
+                      <span class="label">Manager:</span>
+                      <span class="value">{{ company.accountManager }}</span>
+                      <ion-col size="12" size-md="6">
+                        <div class="section-header small">Active Products</div>
+                        <div class="product-list">
+                          <div class="product-item">
+                            <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+                            <span>DMS Acc</span>
+                          </div>
+                          <div class="product-item">
+                            <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+                            <span>Backups</span>
+                          </div>
                         </div>
                       </ion-col>
-                    </ion-row>
-                    <ion-row>
-                      <ion-col size="6">
-                        <ion-label position="stacked">From</ion-label>
-                        <ion-item lines="none" class="date-input">
-                          <ion-input placeholder="Select date"></ion-input>
-                          <ion-icon name="calendar-outline" slot="end"></ion-icon>
-                        </ion-item>
-                      </ion-col>
-                      <ion-col size="6">
-                        <ion-label position="stacked">To</ion-label>
-                        <ion-item lines="none" class="date-input">
-                          <ion-input placeholder="Select date"></ion-input>
-                          <ion-icon name="calendar-outline" slot="end"></ion-icon>
-                        </ion-item>
-                      </ion-col>
-                    </ion-row>
-                  </ion-grid>
-                </div>
-              </div>
-
-              <!-- Manager Filter -->
-              <div class="filter-group">
-                <div class="filter-header">
-                  Filter by Account Manager
-                </div>
-                <div class="filter-content">
-                  <div class="chip-container">
-                    <ion-chip *ngFor="let manager of managers$ | async"
-                      [outline]="filterState.selectedManager !== manager"
-                      [color]="filterState.selectedManager === manager ? 'primary' : 'medium'"
-                      (click)="onManagerChange({detail: {value: manager}})">
-                      <ion-label>{{ manager }}</ion-label>
-                      <ion-badge *ngIf="filterState.selectedManager !== manager" color="light">12</ion-badge>
-                    </ion-chip>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Region Filter -->
-              <div class="filter-group">
-                <div class="filter-header">
-                  Filter by Region
-                </div>
-                <div class="filter-content">
-                  <ion-segment [value]="filterState.selectedRegion" (ionChange)="onRegionChange($event)" mode="ios">
-                    <ion-segment-button value="All">
-                      <ion-label>ALL</ion-label>
-                    </ion-segment-button>
-                    <ion-segment-button value="Inland">
-                      <ion-label>INLAND</ion-label>
-                    </ion-segment-button>
-                    <ion-segment-button value="Coastal">
-                      <ion-label>COASTAL</ion-label>
-                    </ion-segment-button>
-                  </ion-segment>
-
-                  <div class="province-chips ion-margin-top">
-                    <ion-chip *ngFor="let province of provinces$ | async"
-                      [outline]="filterState.selectedProvince !== province"
-                      (click)="onProvinceChange({detail: {value: province}})">
-                      <ion-label>{{ province }}</ion-label>
-                    </ion-chip>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Search Bar -->
-            <ion-searchbar placeholder="Search by name, province, city, suburb, or manager..."
-              [value]="filterState.searchTerm" (ionChange)="onSearchChange($event)" class="custom-searchbar">
-            </ion-searchbar>
-
-            <!-- Client Cards -->
-            <div class="client-list">
-              <ion-card *ngFor="let company of filteredCompanies$ | async" class="client-card"
-                (click)="toggleCard(company.companyId)">
-
-                <ion-card-header>
-                  <div class="card-header-content">
-                    <ion-card-title>{{ company.tradingName }}</ion-card-title>
-                    <ion-icon name="chevron-down-outline"
-                      [class.rotated]="isCardExpanded(company.companyId)"></ion-icon>
-                  </div>
-                  <ion-card-subtitle>
-                    {{ company.location.suburb }}, {{ company.location.province }}
-                  </ion-card-subtitle>
-                </ion-card-header>
-
-                <ion-card-content *ngIf="isCardExpanded(company.companyId)">
-                  <div class="expanded-content">
-                    <!-- Client Details Header -->
-                    <div class="section-header">Client Details</div>
-
-                    <ion-grid>
-                      <ion-row>
-                        <ion-col size="12" size-md="6">
-                          <div class="detail-row">
-                            <span class="label">Manager:</span>
-                            <span class="value">{{ company.accountManager }}</span>
-                          </div>
-                          <div class="detail-row">
-                            <span class="label">Start Date:</span>
-                            <span class="value">1 May 2009</span> <!-- Placeholder -->
-                          </div>
-                          <div class="detail-row">
-                            <span class="label">Last Visit:</span>
-                            <span class="value">{{ formatDate(company.parsedDates.lastSiteVisit) }}</span>
-                          </div>
-                          <div class="detail-row">
-                            <span class="label">Payment:</span>
-                            <span class="value">NetCash</span> <!-- Placeholder -->
-                          </div>
-                        </ion-col>
-
-                        <ion-col size="12" size-md="6">
-                          <div class="section-header small">Active Products</div>
-                          <div class="product-list">
-                            <div class="product-item">
-                              <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
-                              <span>DMS Acc</span>
-                            </div>
-                            <div class="product-item">
-                              <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
-                              <span>Backups</span>
-                            </div>
-                          </div>
-                        </ion-col>
-                      </ion-row>
-                    </ion-grid>
-                  </div>
-                </ion-card-content>
-              </ion-card>
-            </div>
-
-            <!-- Stats Footer -->
-            <ion-card class="stats-card" *ngIf="overdueStats$ | async as stats">
-              <ion-card-content>
-                <div class="stats-text">Unvisited in last 60 days</div>
-                <div class="stats-percentage">{{ stats.percentage | number:'1.1-1' }}%</div>
-                <div class="stats-count">{{ stats.count }} of {{ (filteredCompanies$ | async)?.length }} clients</div>
-              </ion-card-content>
-            </ion-card>
-
+                </ion-row>
+              </ion-grid>
           </div>
-        </ion-content>
+    </ion-card-content>
+  </ion-card>
+  </div>
+
+  <!-- Stats Footer -->
+  <ion-card class="stats-card" *ngIf="overdueStats$ | async as stats">
+    <ion-card-content>
+      <div class="stats-text">Unvisited in last 60 days</div>
+      <div class="stats-percentage">{{ stats.percentage | number:'1.1-1' }}%</div>
+      <div class="stats-count">{{ stats.count }} of {{ (filteredCompanies$ | async)?.length }} clients</div>
+    </ion-card-content>
+  </ion-card>
+
+  </div>
+</ion-content>
