@@ -1,187 +1,228 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { IonicModule, RefresherEventDetail } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, AlertController, LoadingController } from '@ionic/angular';
-import {Router} from '@angular/router';
-import { FrontlineService } from '../../services/frontline.service';
+import { BehaviorSubject, combineLatest, map, Observable, startWith } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
-import { ProcessedCompany, FilterState } from '../../interfaces/frontline.interface';
-import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { ClientData, DataService } from '../../services/data.service';
+import { MapViewComponent } from '../map-view/map-view.component';
+import { Router } from '@angular/router';
+
+interface FilterState {
+  searchTerm: string;
+  selectedManager: string | null;
+  selectedRegion: string;
+  selectedProvince: string | null;
+  showOverdueOnly: boolean;
+}
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, FormsModule],
-  providers: [FrontlineService, AuthService]  // Add this line
+  imports: [CommonModule, IonicModule, FormsModule, MapViewComponent]
 })
-export class DashboardComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>();
+export class DashboardComponent implements OnInit {
+  companies$ = new BehaviorSubject<ClientData[]>([]);
 
-  // Data streams
-  filteredCompanies$: Observable<ProcessedCompany[]>;
-  overdueStats$: Observable<{ count: number; percentage: number; total: number }>;
-  managers$: Observable<string[]>;
-  provinces$: Observable<string[]>;
-  currentUser$: Observable<any>;
-
-  // UI state
-  expandedCards = new Set<string>();
-  showFilters = false;
-  isLoading = false;
-
-  // Current filter state
   filterState: FilterState = {
     searchTerm: '',
     selectedManager: null,
     selectedRegion: 'All',
     selectedProvince: null,
-    productFilters: [],
-    clientAgeFilter: null,
     showOverdueOnly: false
   };
 
+  private filterStateSubject = new BehaviorSubject<FilterState>(this.filterState);
+
+  filteredCompanies$: Observable<ClientData[]>;
+  managers$: Observable<string[]>;
+  provinces$: Observable<string[]>;
+  overdueStats$: Observable<{ count: number; percentage: number }>;
+
+  showFilters = false;
+  expandedCards = new Set<number>();
+  showMap = false;
+
   constructor(
-    private frontlineService: FrontlineService,
     private authService: AuthService,
-    private alertController: AlertController,
-    private loadingController: LoadingController,
+    private dataService: DataService,
     private router: Router
   ) {
-    // Initialize observables
-    this.filteredCompanies$ = this.frontlineService.filteredCompanies$;
-    this.overdueStats$ = this.frontlineService.overdueStats$;
-    this.managers$ = this.frontlineService.getManagers();
-    this.provinces$ = this.frontlineService.getProvinces();
-    this.currentUser$ = this.authService.currentUser$;
+    this.filteredCompanies$ = combineLatest([
+      this.companies$,
+      this.filterStateSubject
+    ]).pipe(
+      map(([companies, filters]) => this.filterCompanies(companies, filters))
+    );
+
+    this.managers$ = this.companies$.pipe(
+      map(companies => [...new Set(companies.map(c => c.accountManager))].sort())
+    );
+
+    this.provinces$ = this.companies$.pipe(
+      map(companies => [...new Set(companies.map(c => c.province))].sort())
+    );
+
+    this.overdueStats$ = this.companies$.pipe(
+      map(companies => {
+        const total = companies.length;
+        if (total === 0) return { count: 0, percentage: 0 };
+        const overdue = companies.filter(c => this.isOverdue(c.lastSiteVisit)).length;
+        return {
+          count: overdue,
+          percentage: (overdue / total) * 100
+        };
+      })
+    );
   }
 
-  async ngOnInit() {
-    this.authService.checkAuthStatus().then(r =>  this.authService.isAuthenticated$.subscribe(isAuth => {
-        if (!isAuth) {
-          this.router.navigate(['/login']);
-        }
-    }));
-
-    await this.loadData();
+  ngOnInit() {
+    this.loadData();
   }
 
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  async loadData() {
-    const loading = await this.loadingController.create({
-      message: 'Loading client data...'
+  loadData() {
+    // First try to login (hardcoded for demo as per request, but ideally should be a login screen)
+    this.authService.login('MyAutmomanUsername', 'MyAutomanPassword').subscribe({
+      next: () => {
+        this.dataService.getClientData().subscribe({
+          next: (data) => {
+            this.companies$.next(data);
+          },
+          error: (err) => console.error('Error fetching data', err)
+        });
+      },
+      error: (err) => console.error('Login failed', err)
     });
-    await loading.present();
-
-    this.frontlineService.loadFrontlineData()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          loading.dismiss();
-        },
-        error: async (error) => {
-          loading.dismiss();
-          const alert = await this.alertController.create({
-            header: 'Error',
-            message: 'Failed to load client data. Please try again.',
-            buttons: ['OK']
-          });
-          await alert.present();
-        }
-      });
   }
 
-  toggleCard(companyId: string) {
-    if (this.expandedCards.has(companyId)) {
-      this.expandedCards.delete(companyId);
-    } else {
-      this.expandedCards.add(companyId);
+  doRefresh(event: any) {
+    this.loadData();
+    if (event && event.target) {
+      event.target.complete();
     }
-  }
-
-  isCardExpanded(companyId: string): boolean {
-    return this.expandedCards.has(companyId);
-  }
-
-  onSearchChange(event: any) {
-    this.filterState.searchTerm = event.detail.value || '';
-    this.frontlineService.updateFilter({ searchTerm: this.filterState.searchTerm });
-  }
-
-  onManagerChange(event: any) {
-    this.filterState.selectedManager = event.detail.value;
-    this.frontlineService.updateFilter({ selectedManager: this.filterState.selectedManager });
-  }
-
-  onRegionChange(event: any) {
-    this.filterState.selectedRegion = event.detail.value;
-    this.frontlineService.updateFilter({ selectedRegion: this.filterState.selectedRegion });
-  }
-
-  onProvinceChange(event: any) {
-    this.filterState.selectedProvince = event.detail.value;
-    this.frontlineService.updateFilter({ selectedProvince: this.filterState.selectedProvince });
-  }
-
-  toggleOverdueFilter() {
-    this.filterState.showOverdueOnly = !this.filterState.showOverdueOnly;
-    this.frontlineService.updateFilter({ showOverdueOnly: this.filterState.showOverdueOnly });
   }
 
   toggleFilters() {
     this.showFilters = !this.showFilters;
   }
 
+  toggleMap() {
+    this.showMap = !this.showMap;
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+
+  // Filter Logic
+  filterCompanies(companies: ClientData[], filters: FilterState): ClientData[] {
+    return companies.filter(company => {
+      // Search Term
+      if (filters.searchTerm) {
+        const term = filters.searchTerm.toLowerCase();
+        const matchesSearch =
+          company.tradingName.toLowerCase().includes(term) ||
+          company.accountManager.toLowerCase().includes(term) ||
+          company.city.toLowerCase().includes(term) ||
+          company.suburb.toLowerCase().includes(term) ||
+          company.province.toLowerCase().includes(term);
+
+        if (!matchesSearch) return false;
+      }
+
+      // Manager
+      if (filters.selectedManager && company.accountManager !== filters.selectedManager) {
+        return false;
+      }
+
+      // Region (Approximation based on province for demo)
+      if (filters.selectedRegion !== 'All') {
+        const isCoastal = ['Western Cape', 'Eastern Cape', 'KwaZulu-Natal'].includes(company.province);
+        if (filters.selectedRegion === 'Coastal' && !isCoastal) return false;
+        if (filters.selectedRegion === 'Inland' && isCoastal) return false;
+      }
+
+      // Province
+      if (filters.selectedProvince && company.province !== filters.selectedProvince) {
+        return false;
+      }
+
+      // Overdue
+      if (filters.showOverdueOnly && !this.isOverdue(company.lastSiteVisit)) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+
+  // Helpers
+  isOverdue(dateStr: string): boolean {
+    if (!dateStr) return true;
+    const lastVisit = new Date(dateStr);
+    const sixtyDaysAgo = new Date();
+    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+    return lastVisit < sixtyDaysAgo;
+  }
+
+  formatDate(dateStr: string): string {
+    if (!dateStr) return 'Never';
+    return new Date(dateStr).toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  }
+
+  // Event Handlers
+  onSearchChange(event: any) {
+    this.updateFilter({ searchTerm: event.detail.value });
+  }
+
+  onManagerChange(event: any) {
+    this.updateFilter({ selectedManager: event.detail.value });
+  }
+
+  onRegionChange(event: any) {
+    this.updateFilter({ selectedRegion: event.detail.value });
+  }
+
+  onProvinceChange(event: any) {
+    this.updateFilter({ selectedProvince: event.detail.value });
+  }
+
+  toggleOverdueFilter() {
+    this.updateFilter({ showOverdueOnly: !this.filterState.showOverdueOnly });
+  }
+
   clearFilters() {
-    this.filterState = {
+    this.filterStateSubject.next({
       searchTerm: '',
       selectedManager: null,
       selectedRegion: 'All',
       selectedProvince: null,
-      productFilters: [],
-      clientAgeFilter: null,
       showOverdueOnly: false
-    };
-    this.frontlineService.updateFilter(this.filterState);
-  }
-
-  async doRefresh(event: any) {
-    await this.loadData();
-    event.target.complete();
-  }
-
-  formatDate(date: Date | undefined): string {
-    if (!date) return 'N/A';
-    return new Intl.DateTimeFormat('en-ZA', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    }).format(date);
-  }
-
-  async logout() {
-    const alert = await this.alertController.create({
-      header: 'Logout',
-      message: 'Are you sure you want to logout?',
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel'
-        },
-        {
-          text: 'Logout',
-          handler: () => {
-            this.authService.logout().subscribe();
-          }
-        }
-      ]
     });
-    await alert.present();
+  }
+
+  private updateFilter(update: Partial<FilterState>) {
+    this.filterState = { ...this.filterState, ...update };
+    this.filterStateSubject.next(this.filterState);
+  }
+
+  // Card Expansion
+  toggleCard(id: number) {
+    if (this.expandedCards.has(id)) {
+      this.expandedCards.delete(id);
+    } else {
+      this.expandedCards.add(id);
+    }
+  }
+
+  isCardExpanded(id: number): boolean {
+    return this.expandedCards.has(id);
   }
 }
