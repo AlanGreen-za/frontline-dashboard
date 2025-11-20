@@ -26,16 +26,17 @@ export interface ClientData {
     providedIn: 'root'
 })
 export class DataService {
-    private apiUrl = 'https://office.vmgsoftware.co.za:10011/Frontline';
+  private apiUrl = `${this.authService.IsInternal ? 'https://192.168.1.13:10011' : 'https://office.vmgsoftware.co.za:10011'}/Frontline`;
 
     constructor(private http: HttpClient, private authService: AuthService) { }
 
     getClientData(): Observable<ClientData[]> {
         return from(this.authService.getToken()).pipe(
-            switchMap(token => {
-                const headers = new HttpHeaders({
-                    'Authorization': `Bearer ${token}`
-                });
+          switchMap(tokenResponse => {
+            const tokenObj = typeof tokenResponse === 'string' ? JSON.parse(tokenResponse) : tokenResponse;
+            const headers = new HttpHeaders({
+              'Authorization': `Bearer ${tokenObj.token}`
+            });
                 return this.http.get<ClientData[]>(this.apiUrl, { headers });
             })
         );

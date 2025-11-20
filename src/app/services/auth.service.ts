@@ -8,7 +8,16 @@ import { LoginRequest } from '../interfaces/frontline.interface';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'https://office.vmgsoftware.co.za:10011/Auth/Login';
+  private readonly internalBaseUrl = 'https://192.168.1.13:10011';
+  private readonly externalBaseUrl = 'https://office.vmgsoftware.co.za:10011';
+
+  private get baseUrl(): string {
+    return this.IsInternal ? this.internalBaseUrl : this.externalBaseUrl;
+  }
+
+  private get apiUrl(): string {
+    return `${this.baseUrl}/Auth/Login`;
+  }
   private tokenKey = 'auth_token';
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
 

@@ -51,7 +51,7 @@
               type="text"
               formControlName="username"
               autocomplete="username"
-              required>
+              [required]="true">
             </ion-input>
           </ion-item>
           <div class="error-message" *ngIf="username?.invalid && username?.touched">
@@ -64,7 +64,7 @@
               [type]="showPassword ? 'text' : 'password'"
               formControlName="password"
               autocomplete="current-password"
-              required>
+              [required]="true">
             </ion-input>
             <ion-button
               fill="clear"

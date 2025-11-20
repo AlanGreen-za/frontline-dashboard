@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, RefresherEventDetail } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
-import { BehaviorSubject, combineLatest, map, Observable, startWith } from 'rxjs';
+import {BehaviorSubject, combineLatest, map, Observable, startWith, take} from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { ClientData, DataService } from '../../services/data.service';
 import { MapViewComponent } from '../map-view/map-view.component';
@@ -25,6 +25,7 @@ interface FilterState {
 })
 export class DashboardComponent implements OnInit {
   companies$ = new BehaviorSubject<ClientData[]>([]);
+  isAuthenticated$ = this.authService.isAuthenticated$;
 
   filterState: FilterState = {
     searchTerm: '',
@@ -78,22 +79,23 @@ export class DashboardComponent implements OnInit {
     );
   }
 
-  ngOnInit() {
-    this.loadData();
+  async ngOnInit() {
+    await this.authService.checkAuthStatus();
+    this.authService.isAuthenticated$.pipe(take(1)).subscribe(isAuthenticated => {
+      if (!isAuthenticated) {
+        this.router.navigate(['/login']);
+      } else {
+        this.loadData();
+      }
+    });
   }
 
   loadData() {
-    // First try to login (hardcoded for demo as per request, but ideally should be a login screen)
-    this.authService.login({ username: 'MyAutmomanUsername', password: 'MyAutomanPassword' }).subscribe({
-      next: () => {
-        this.dataService.getClientData().subscribe({
-          next: (data) => {
-            this.companies$.next(data);
-          },
-          error: (err) => console.error('Error fetching data', err)
-        });
+    this.dataService.getClientData().subscribe({
+      next: (data) => {
+        this.companies$.next(data);
       },
-      error: (err) => console.error('Login failed', err)
+      error: (err) => console.error('Error fetching data', err)
     });
   }
 

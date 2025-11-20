@@ -20,7 +20,7 @@
 
   <!-- Map View -->
   <div class="map-wrapper" *ngIf="showMap">
-    <app-map-view [clients]="filteredCompanies$ | async"></app-map-view>
+    <app-map-view [clients]="(filteredCompanies$ | async) ?? []"></app-map-view>
   </div>
 
   <div [class.hidden]="showMap">
@@ -117,33 +117,35 @@
     <div class="client-list">
       <ion-card *ngFor="let company of filteredCompanies$ | async" class="client-card"
         (click)="toggleCard(company.companyId)">
-        <!-- Client Details Header -->
-        <div class="section-header">Client Details</div>
+        <ion-card-content>
+          <!-- Client Details Header -->
+          <div class="section-header">Client Details</div>
 
-        <ion-grid>
+          <ion-grid>
           <ion-row>
             <ion-col size="12" size-md="6">
               <div class="detail-row">
                 <span class="label">Manager:</span>
-
-                <ion-col size="12" size-md="6">
-                  <div class="section-header small">Active Products</div>
-                  <div class="product-list">
-                    <div class="product-item">
-                      <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
-                      <span>DMS Acc</span>
-                    </div>
-                    <div class="product-item">
-                      <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
-                      <span>Backups</span>
-                    </div>
-                  </div>
-                </ion-col>
+                <span class="value">{{ company.accountManager }}</span>
+              </div>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <div class="section-header small">Active Products</div>
+              <div class="product-list">
+                <div class="product-item">
+                  <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+                  <span>DMS Acc</span>
+                </div>
+                <div class="product-item">
+                  <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+                  <span>Backups</span>
+                </div>
+              </div>
+            </ion-col>
           </ion-row>
-        </ion-grid>
-    </div>
-    </ion-card-content>
-    </ion-card>
+          </ion-grid>
+        </ion-card-content>
+      </ion-card>
   </div>
 
   <!-- Stats Footer -->
@@ -171,7 +173,7 @@
 
         <!-- Map View -->
         <div class="map-wrapper" *ngIf="showMap">
-          <app-map-view [clients]="filteredCompanies$ | async"></app-map-view>
+          <app-map-view [clients]="(filteredCompanies$ | async) ?? []"></app-map-view>
         </div>
 
         <div [class.hidden]="showMap">
@@ -267,7 +269,7 @@
           </ion-searchbar>
 
           <!-- Client Cards -->
-          <div class="client-list">
+          <ion-card class="client-list">
             <ion-card *ngFor="let company of filteredCompanies$ | async" class="client-card"
               (click)="toggleCard(company.companyId)">
 
@@ -289,11 +291,16 @@
                             <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
                             <span>Backups</span>
                           </div>
-                        </div>
+                      </div>
                       </ion-col>
+                    </div>
+                  </ion-col>
                 </ion-row>
               </ion-grid>
-          </div>
+            </ion-card>
+          </ion-card>
+        </div>
+      </ion-content>
     </ion-card-content>
   </ion-card>
   </div>
@@ -306,6 +313,4 @@
       <div class="stats-count">{{ stats.count }} of {{ (filteredCompanies$ | async)?.length }} clients</div>
     </ion-card-content>
   </ion-card>
-
-  </div>
 </ion-content>
