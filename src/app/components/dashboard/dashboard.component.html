@@ -1,6 +1,6 @@
 <ion-header class="ion-no-border">
   <ion-toolbar>
-    <ion-title color="dark">Frontline Explorer</ion-title>
+    <ion-title color="dark">FrontMan</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="toggleMap()">
         <ion-icon [name]="showMap ? 'list-outline' : 'map-outline'"></ion-icon>
@@ -136,41 +136,127 @@
         </div>
       </div>
     </div>
+
   </div>
 
-  <!-- Client Cards -->
+  <!-- Client List -->
+  <h3 class="list-title">Customer Details</h3>
   <div class="client-list">
-    <ion-card *ngFor="let company of filteredCompanies$ | async" class="client-card"
-      (click)="toggleCard(company.companyId)">
-      <ion-card-content>
-        <!-- Client Details Header -->
-        <div class="section-header">Client Details</div>
+    <div class="client-card" *ngFor="let company of filteredCompanies$ | async">
+      <div class="card-header" (click)="toggleCard(company.companyId)">
+        <div class="header-content">
+          <div class="trading-name" [class.overdue]="isOverdue(company.lastSiteVisit)">
+            {{ company.tradingName }}
+          </div>
+          <div class="subtitle">
+            {{ company.suburb }}, {{ company.province }} · {{ calculateAge(company.startDate) }} · {{
+            company.accountManager }}
+          </div>
+        </div>
+        <div class="expand-icon">
+          <ion-icon name="chevron-down-outline" [class.rotated]="isCardExpanded(company.companyId)"></ion-icon>
+        </div>
+      </div>
 
-        <ion-grid>
-          <ion-row>
-            <ion-col size="12" size-md="6">
-              <div class="detail-row">
-                <span class="label">Manager:</span>
-                <span class="value">{{ company.accountManager }}</span>
+      <div class="card-body" *ngIf="isCardExpanded(company.companyId)">
+        <ion-card-content>
+
+          <!-- Client Details -->
+          <div class="section-header">Client Details</div>
+          <div class="info-list">
+            <div class="info-item">
+              <span class="label">Manager:</span>
+              <span class="value">{{ company.accountManager }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Start Date:</span>
+              <span class="value">{{ company.startDate | date:'d MMMM yyyy' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Last Visit:</span>
+              <span class="value">{{ company.lastSiteVisit | date:'d MMMM yyyy' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Payment:</span>
+              <span class="value">{{ company.paymentMethod }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Company ID:</span>
+              <span class="value">{{ company.companyId }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Last Invoice:</span>
+              <span class="value">{{ company.lastInvoiceAmount | currency:'ZAR':'symbol-narrow':'1.2-2' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Location:</span>
+              <span class="value location-link">
+                <ion-icon name="location-outline"></ion-icon> View on Map
+              </span>
+            </div>
+          </div>
+
+          <!-- Active Products -->
+          <div class="section-header">Active Products</div>
+          <div class="check-list">
+            <div class="check-item" *ngFor="let product of company.products | keyvalue">
+              <ng-container *ngIf="product.value">
+                <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+                <span>{{ product.key }}</span>
+              </ng-container>
+            </div>
+          </div>
+
+          <!-- Active Feeds -->
+          <div class="section-header">Active Feeds</div>
+          <div class="check-list">
+            <div class="check-item" *ngFor="let feed of company.feeds | keyvalue">
+              <ng-container *ngIf="feed.value">
+                <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+                <span>{{ feed.key }}</span>
+              </ng-container>
+            </div>
+          </div>
+
+          <!-- DB Info -->
+          <div class="section-header">DB Info</div>
+          <div class="db-info-list">
+            <div class="db-card" *ngFor="let db of company.dbInfo">
+              <div class="db-row">
+                <span class="label">Server Address:</span>
+                <span class="value">{{ db.serverAddress }}</span>
               </div>
-            </ion-col>
-            <ion-col size="12" size-md="6">
-              <div class="section-header small">Active Products</div>
-              <div class="product-list">
-                <div class="product-item">
-                  <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
-                  <span>DMS Acc</span>
-                </div>
-                <div class="product-item">
-                  <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
-                  <span>Backups</span>
-                </div>
+              <div class="db-row">
+                <span class="label">Install Date:</span>
+                <span class="value">{{ db.installDate | date:'MMM d yyyy h:mm:ss:a' }}</span>
               </div>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-      </ion-card-content>
-    </ion-card>
+            </div>
+            <div class="no-data" *ngIf="!company.dbInfo?.length">
+              No DB info available.
+            </div>
+          </div>
+
+          <!-- Activity -->
+          <div class="section-header">Activity Last 120 Days</div>
+          <div class="activity-list">
+            <div class="activity-item" *ngFor="let act of company.activity">
+              <div class="item-header">
+                <span class="ticket-id">Ticket: {{ act.activityId }}</span>
+                <span class="staff-name">By: {{ act.performedBy }}</span>
+                <span class="date">{{ act.date | date:'MMM d yyyy h:mm:ss:a' }}</span>
+              </div>
+              <div class="item-content">
+                {{ act.notes || act.description }}
+              </div>
+            </div>
+            <div class="no-data" *ngIf="!company.activity?.length">
+              No activities found in the last 120 days.
+            </div>
+          </div>
+
+        </ion-card-content>
+      </div>
+    </div>
   </div>
 
 </ion-content>

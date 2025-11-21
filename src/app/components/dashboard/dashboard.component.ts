@@ -252,8 +252,8 @@ export class DashboardComponent implements OnInit {
     this.showFeedsFilter = !this.showFeedsFilter;
   }
 
-  logout() {
-    this.authService.logout();
+  async logout() {
+    await this.authService.logout();
     this.router.navigate(['/login']);
   }
 
@@ -353,6 +353,27 @@ export class DashboardComponent implements OnInit {
       month: 'long',
       year: 'numeric'
     });
+  }
+
+  calculateAge(startDate: string): string {
+    if (!startDate) return 'Unknown';
+
+    const start = new Date(startDate);
+    const now = new Date();
+
+    let years = now.getFullYear() - start.getFullYear();
+    let months = now.getMonth() - start.getMonth();
+
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+
+    const parts = [];
+    if (years > 0) parts.push(`${years} yrs`);
+    if (months > 0) parts.push(`${months} mos`);
+
+    return parts.length > 0 ? parts.join(', ') : '0 mos';
   }
 
   // Event Handlers
