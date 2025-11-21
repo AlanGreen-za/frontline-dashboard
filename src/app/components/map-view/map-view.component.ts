@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, OnChanges, SimpleChanges } from '@angular/core';
 import { GoogleMap, Marker } from '@capacitor/google-maps';
 import { Geolocation } from '@capacitor/geolocation';
 import { ClientData } from '../../services/data.service';
@@ -10,16 +10,22 @@ import { environment } from 'src/environments/environment';
   styleUrls: ['./map-view.component.scss'],
   standalone: true
 })
-export class MapViewComponent implements OnInit, OnDestroy {
+export class MapViewComponent implements OnInit, OnDestroy, OnChanges {
   @Input() clients: ClientData[] = [];
   @ViewChild('map') mapRef!: ElementRef<HTMLElement>;
   newMap!: GoogleMap;
-  apiKey = 'AIzaSyCQlRiBuc2ARzifFEUAaNX7XXfevll1UAQ'; // In a real app, use environment variables
+  apiKey = environment.googleMapsApiKey;
+  markerIds: string[] = [];
 
   constructor() { }
 
   ngOnInit() {
-    // Map initialization is handled in ngAfterViewInit or explicitly called
+  }
+
+  async ngOnChanges(changes: SimpleChanges) {
+    if (changes['clients'] && this.newMap) {
+      await this.addMarkers();
+    }
   }
 
   async ngAfterViewInit() {
@@ -42,25 +48,60 @@ export class MapViewComponent implements OnInit, OnDestroy {
       },
     });
 
-    await this.addMarkers();
+    // await this.locateUser(); // Temporarily disabled to isolate marker issue
     await this.locateUser();
+    await this.addMarkers();
   }
 
   async addMarkers() {
-    if (!this.newMap || !this.clients) return;
+    if (!this.newMap) return;
+
+    // Clear existing markers
+    if (this.markerIds.length > 0) {
+      await this.newMap.removeMarkers(this.markerIds);
+      this.markerIds = [];
+    }
+
+    if (!this.clients) return;
 
     const markers: Marker[] = this.clients
-      .filter(client => client.latLong)
+      .filter(client => client.latLong && typeof client.latLong === 'string')
       .map(client => {
-        const [lat, lng] = client.latLong.split(',').map(coord => parseFloat(coord.trim()));
+        const parts = client.latLong.split(',');
+        if (parts.length !== 2) return null;
+
+        const lat = parseFloat(parts[0].trim());
+        const lng = parseFloat(parts[1].trim());
+
+        if (isNaN(lat) || isNaN(lng)) return null;
+
+        // Check if overdue (more than 60 days)
+        let isOverdue = true;
+        if (client.lastSiteVisit) {
+          const lastVisit = new Date(client.lastSiteVisit);
+          const sixtyDaysAgo = new Date();
+          sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+          isOverdue = lastVisit < sixtyDaysAgo;
+        }
+
+        // Set icon based on status
+        // Using Google Maps standard icons (HTTPS)
+        const iconUrl = isOverdue
+          ? 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'
+          : 'https://maps.google.com/mapfiles/ms/icons/green-dot.png';
+
         return {
           coordinate: { lat, lng },
           title: client.tradingName,
-          snippet: client.accountManager
+          snippet: `${client.accountManager} - ${isOverdue ? 'Overdue' : 'Visited'}`,
+          iconUrl: iconUrl
         };
-      });
+      })
+      .filter(marker => marker !== null) as Marker[];
 
-    await this.newMap.addMarkers(markers);
+    if (markers.length > 0) {
+      this.markerIds = await this.newMap.addMarkers(markers);
+    }
   }
 
   async locateUser() {
@@ -73,11 +114,6 @@ export class MapViewComponent implements OnInit, OnDestroy {
 
       const position = await Geolocation.getCurrentPosition();
 
-      // Add blue dot for user (using a custom icon if possible, or just a marker for now)
-      // Google Maps SDK for Capacitor doesn't support custom marker icons easily in all versions, 
-      // but we can try to use a different color or just a marker.
-      // For now, we will center the map on the user.
-
       await this.newMap.setCamera({
         coordinate: {
           lat: position.coords.latitude,
@@ -87,7 +123,6 @@ export class MapViewComponent implements OnInit, OnDestroy {
         animate: true
       });
 
-      // Add a marker for the user
       await this.newMap.addMarker({
         coordinate: {
           lat: position.coords.latitude,

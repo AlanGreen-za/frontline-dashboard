@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, RefresherEventDetail } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
-import {BehaviorSubject, combineLatest, map, Observable, startWith, take} from 'rxjs';
+import { BehaviorSubject, combineLatest, map, Observable, startWith, take } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { ClientData, DataService } from '../../services/data.service';
 import { MapViewComponent } from '../map-view/map-view.component';
@@ -13,8 +13,14 @@ interface FilterState {
   selectedManager: string | null;
   selectedRegion: string;
   selectedProvince: string | null;
+  selectedProducts: string[];
+  productFilterMode: 'has' | 'doesntHave';
+  selectedFeeds: string[];
   showOverdueOnly: boolean;
 }
+
+const COASTAL_PROVINCES = ['Eastern Cape', 'Northern Cape', 'Western Cape'];
+const INLAND_PROVINCES = ['Free State', 'Gauteng', 'KwaZulu-Natal', 'Limpopo', 'Mpumalanga', 'North West'];
 
 @Component({
   selector: 'app-dashboard',
@@ -32,6 +38,9 @@ export class DashboardComponent implements OnInit {
     selectedManager: null,
     selectedRegion: 'All',
     selectedProvince: null,
+    selectedProducts: [],
+    productFilterMode: 'has',
+    selectedFeeds: [],
     showOverdueOnly: false
   };
 
@@ -40,11 +49,20 @@ export class DashboardComponent implements OnInit {
   filteredCompanies$: Observable<ClientData[]>;
   managers$: Observable<string[]>;
   provinces$: Observable<string[]>;
+  products$: Observable<string[]>;
+  feeds$: Observable<string[]>;
   overdueStats$: Observable<{ count: number; percentage: number }>;
+  managerCounts$: Observable<Map<string, number>>;
+  provinceCounts$: Observable<Map<string, number>>;
+  productCounts$: Observable<Map<string, number>>;
+  feedCounts$: Observable<Map<string, number>>;
+  inlandCount$: Observable<number>;
+  coastalCount$: Observable<number>;
 
   showFilters = false;
   expandedCards = new Set<number>();
   showMap = false;
+  showFeedsFilter = false;
 
   constructor(
     private authService: AuthService,
@@ -62,8 +80,56 @@ export class DashboardComponent implements OnInit {
       map(companies => [...new Set(companies.map(c => c.accountManager))].sort())
     );
 
-    this.provinces$ = this.companies$.pipe(
-      map(companies => [...new Set(companies.map(c => c.province))].sort())
+    this.provinces$ = combineLatest([
+      this.companies$,
+      this.filterStateSubject
+    ]).pipe(
+      map(([companies, filters]) => {
+        const allProvinces = [...new Set(companies.map(c => c.province))].sort();
+
+        if (filters.selectedRegion === 'All') {
+          return allProvinces;
+        }
+
+        const targetList = filters.selectedRegion === 'Coastal' ? COASTAL_PROVINCES : INLAND_PROVINCES;
+        return allProvinces.filter(p => targetList.includes(p));
+      })
+    );
+
+    this.products$ = this.companies$.pipe(
+      map(companies => {
+        const productSet = new Set<string>();
+        companies.forEach(company => {
+          if (company.products && typeof company.products === 'object') {
+            Object.keys(company.products).forEach(product => {
+              if (company.products[product]) {
+                productSet.add(product);
+              }
+            });
+          }
+        });
+        return [...productSet].sort();
+      })
+    );
+
+    this.feeds$ = this.companies$.pipe(
+      map(companies => {
+        const feedSet = new Set<string>();
+        companies.forEach(company => {
+          // Get the feeds data - handle nested structure { feeds: { feeds: "..." } }
+          let feedsData: any = company.feeds;
+          if (feedsData && typeof feedsData === 'object' && feedsData.feeds) {
+            feedsData = feedsData.feeds;
+          }
+
+          // Parse the comma-separated string
+          if (feedsData && typeof feedsData === 'string') {
+            const feedList = feedsData.split(',').map((f: string) => f.trim()).filter((f: string) => f);
+            feedList.forEach(feed => feedSet.add(feed));
+          }
+        });
+        return [...feedSet].sort();
+      })
     );
 
     this.overdueStats$ = this.companies$.pipe(
@@ -76,6 +142,74 @@ export class DashboardComponent implements OnInit {
           percentage: (overdue / total) * 100
         };
       })
+    );
+
+    this.managerCounts$ = this.companies$.pipe(
+      map(companies => {
+        const counts = new Map<string, number>();
+        companies.forEach(company => {
+          const manager = company.accountManager;
+          counts.set(manager, (counts.get(manager) || 0) + 1);
+        });
+        return counts;
+      })
+    );
+
+    this.provinceCounts$ = this.companies$.pipe(
+      map(companies => {
+        const counts = new Map<string, number>();
+        companies.forEach(company => {
+          const province = company.province;
+          counts.set(province, (counts.get(province) || 0) + 1);
+        });
+        return counts;
+      })
+    );
+
+    this.productCounts$ = this.companies$.pipe(
+      map(companies => {
+        const counts = new Map<string, number>();
+        companies.forEach(company => {
+          if (company.products && typeof company.products === 'object') {
+            Object.keys(company.products).forEach(product => {
+              if (company.products[product]) {
+                counts.set(product, (counts.get(product) || 0) + 1);
+              }
+            });
+          }
+        });
+        return counts;
+      })
+    );
+
+    this.feedCounts$ = this.companies$.pipe(
+      map(companies => {
+        const counts = new Map<string, number>();
+        companies.forEach(company => {
+          // Get the feeds data - handle nested structure { feeds: { feeds: "..." } }
+          let feedsData: any = company.feeds;
+          if (feedsData && typeof feedsData === 'object' && feedsData.feeds) {
+            feedsData = feedsData.feeds;
+          }
+
+          // Parse and count the comma-separated string
+          if (feedsData && typeof feedsData === 'string') {
+            const feedList = feedsData.split(',').map((f: string) => f.trim()).filter((f: string) => f);
+            feedList.forEach(feed => {
+              counts.set(feed, (counts.get(feed) || 0) + 1);
+            });
+          }
+        });
+        return counts;
+      })
+    );
+
+    this.inlandCount$ = this.companies$.pipe(
+      map(companies => companies.filter(c => INLAND_PROVINCES.includes(c.province)).length)
+    );
+
+    this.coastalCount$ = this.companies$.pipe(
+      map(companies => companies.filter(c => COASTAL_PROVINCES.includes(c.province)).length)
     );
   }
 
@@ -114,6 +248,10 @@ export class DashboardComponent implements OnInit {
     this.showMap = !this.showMap;
   }
 
+  toggleFeedsFilter() {
+    this.showFeedsFilter = !this.showFeedsFilter;
+  }
+
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);
@@ -140,16 +278,54 @@ export class DashboardComponent implements OnInit {
         return false;
       }
 
-      // Region (Approximation based on province for demo)
+      // Region
       if (filters.selectedRegion !== 'All') {
-        const isCoastal = ['Western Cape', 'Eastern Cape', 'KwaZulu-Natal'].includes(company.province);
+        const isCoastal = COASTAL_PROVINCES.includes(company.province);
         if (filters.selectedRegion === 'Coastal' && !isCoastal) return false;
         if (filters.selectedRegion === 'Inland' && isCoastal) return false;
+        // Also handle the case where a province might not be in either list
+        if (filters.selectedRegion === 'Inland' && !INLAND_PROVINCES.includes(company.province)) return false;
       }
 
       // Province
       if (filters.selectedProvince && company.province !== filters.selectedProvince) {
         return false;
+      }
+
+      // Products
+      if (filters.selectedProducts.length > 0) {
+        const hasAnySelectedProduct = filters.selectedProducts.some(product => {
+          return company.products && company.products[product];
+        });
+
+        if (filters.productFilterMode === 'has' && !hasAnySelectedProduct) {
+          return false;
+        }
+        if (filters.productFilterMode === 'doesntHave' && hasAnySelectedProduct) {
+          return false;
+        }
+      }
+
+      // Feeds
+      if (filters.selectedFeeds.length > 0) {
+        // Get the feeds data - handle nested structure { feeds: { feeds: "..." } }
+        let feedsData: any = company.feeds;
+        if (feedsData && typeof feedsData === 'object' && feedsData.feeds) {
+          feedsData = feedsData.feeds;
+        }
+
+        // Check if company has any of the selected feeds
+        if (feedsData && typeof feedsData === 'string') {
+          const companyFeeds = feedsData.split(',').map((f: string) => f.trim());
+          const hasAnySelectedFeed = filters.selectedFeeds.some(feed => companyFeeds.includes(feed));
+
+          if (!hasAnySelectedFeed) {
+            return false;
+          }
+        } else {
+          // If feeds data is not a string, exclude this company
+          return false;
+        }
       }
 
       // Overdue
@@ -196,6 +372,36 @@ export class DashboardComponent implements OnInit {
     this.updateFilter({ selectedProvince: event.detail.value });
   }
 
+  onProductChange(product: string) {
+    const selectedProducts = [...this.filterState.selectedProducts];
+    const index = selectedProducts.indexOf(product);
+
+    if (index > -1) {
+      selectedProducts.splice(index, 1);
+    } else {
+      selectedProducts.push(product);
+    }
+
+    this.updateFilter({ selectedProducts });
+  }
+
+  onProductFilterModeChange(mode: 'has' | 'doesntHave') {
+    this.updateFilter({ productFilterMode: mode });
+  }
+
+  onFeedChange(feed: string) {
+    const selectedFeeds = [...this.filterState.selectedFeeds];
+    const index = selectedFeeds.indexOf(feed);
+
+    if (index > -1) {
+      selectedFeeds.splice(index, 1);
+    } else {
+      selectedFeeds.push(feed);
+    }
+
+    this.updateFilter({ selectedFeeds });
+  }
+
   toggleOverdueFilter() {
     this.updateFilter({ showOverdueOnly: !this.filterState.showOverdueOnly });
   }
@@ -206,6 +412,9 @@ export class DashboardComponent implements OnInit {
       selectedManager: null,
       selectedRegion: 'All',
       selectedProvince: null,
+      selectedProducts: [],
+      productFilterMode: 'has',
+      selectedFeeds: [],
       showOverdueOnly: false
     });
   }
