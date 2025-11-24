@@ -3,16 +3,19 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Preferences } from '@capacitor/preferences';
 import { LoginRequest } from '../interfaces/frontline.interface';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly internalBaseUrl = 'https://192.168.1.13:10011';
-  private readonly externalBaseUrl = 'https://office.vmgsoftware.co.za:10011';
+  public IsInternal: boolean = true;
+
 
   private get baseUrl(): string {
-    return this.IsInternal ? this.internalBaseUrl : this.externalBaseUrl;
+    console.log("this.IsInternal", this.IsInternal);
+    
+    return this.IsInternal ? environment.internalBaseUrl : environment.externalBaseUrl;
   }
 
   private get apiUrl(): string {
@@ -22,7 +25,6 @@ export class AuthService {
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
 
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
-  public IsInternal: boolean = true;
 
   constructor(private http: HttpClient) {
     this.checkAuthStatus();
