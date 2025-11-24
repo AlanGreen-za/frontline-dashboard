@@ -1,5 +1,8 @@
 <ion-header class="ion-no-border">
   <ion-toolbar>
+    <ion-buttons slot="start">
+      <img src="assets/icon/logo.png" alt="Logo" class="header-logo" />
+    </ion-buttons>
     <ion-title color="dark">FrontMan</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="toggleMap()">
@@ -8,9 +11,11 @@
       <ion-button (click)="toggleFilters()">
         <ion-icon name="filter-outline"></ion-icon>
       </ion-button>
-      <ion-button (click)="logout()" color="danger" class="logout-button">
-        <ion-icon name="log-out-outline" size="large" slot="start"></ion-icon>
-        Logout
+      <ion-button (click)="resetFilters()">
+        <img src="assets/icon/refresh-icon.png" alt="Refresh" class="header-icon" />
+      </ion-button>
+      <ion-button (click)="logout()">
+        <img src="assets/icon/logout-icon.png" alt="Logout" class="header-icon" />
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -19,8 +24,8 @@
 <ion-content class="ion-padding">
 
   <!-- Search Bar -->
-  <ion-searchbar placeholder="Search by name, province, city, suburb, or manager..." [value]="filterState.searchTerm"
-    (ionChange)="onSearchChange($event)" class="custom-searchbar">
+  <ion-searchbar placeholder="name, province, city, suburb, manager..." [value]="filterState.searchTerm"
+    (ionChange)="onSearchChange($event)" class="custom-searchbar duplicate-searchbar">
   </ion-searchbar>
 
   <!-- Map View (Always Visible) -->
@@ -46,13 +51,12 @@
         Filter by Account Manager
       </div>
       <div class="filter-content">
-        <div class="chip-container">
-          <ion-chip *ngFor="let manager of managers$ | async" [outline]="filterState.selectedManager !== manager"
-            [color]="filterState.selectedManager === manager ? 'primary' : 'medium'"
-            (click)="onManagerChange({detail: {value: manager}})">
+        <div class="chip-grid">
+          <ion-chip *ngFor="let manager of managers$ | async"
+            [outline]="!filterState.selectedManagers.includes(manager)"
+            [class.selected-chip]="filterState.selectedManagers.includes(manager)" (click)="onManagerChange(manager)">
             <ion-label>{{ manager }}</ion-label>
-            <ion-badge *ngIf="filterState.selectedManager !== manager" color="light">{{ (managerCounts$ |
-              async)?.get(manager) || 0 }}</ion-badge>
+            <ion-badge>{{ (managerCounts$ | async)?.get(manager) || 0 }}</ion-badge>
           </ion-chip>
         </div>
       </div>
@@ -64,25 +68,28 @@
         Filter by Region
       </div>
       <div class="filter-content">
-        <ion-segment [value]="filterState.selectedRegion" (ionChange)="onRegionChange($event)" mode="ios">
-          <ion-segment-button value="All">
-            <ion-label>ALL</ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="Inland">
-            <ion-label>INLAND ({{ inlandCount$ | async }})</ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="Coastal">
-            <ion-label>COASTAL ({{ coastalCount$ | async }})</ion-label>
-          </ion-segment-button>
-        </ion-segment>
 
-        <div class="province-chips ion-margin-top">
-          <ion-chip *ngFor="let province of provinces$ | async" [outline]="filterState.selectedProvince !== province"
-            [color]="filterState.selectedProvince === province ? 'primary' : 'medium'"
-            (click)="onProvinceChange({detail: {value: province}})">
+        <!-- Custom Region Toggles matching design -->
+        <div class="region-filter-container">
+          <div class="region-toggle" [class.selected]="filterState.selectedRegions.includes('Inland')"
+            (click)="onRegionToggle('Inland')">
+            <span class="label">INLAND</span>
+            <span class="count">{{ inlandCount$ | async }}</span>
+          </div>
+          <div class="region-toggle" [class.selected]="filterState.selectedRegions.includes('Coastal')"
+            (click)="onRegionToggle('Coastal')">
+            <span class="label">COASTAL</span>
+            <span class="count">{{ coastalCount$ | async }}</span>
+          </div>
+        </div>
+
+        <div class="chip-grid ion-margin-top">
+          <ion-chip *ngFor="let province of provinces$ | async"
+            [outline]="!filterState.selectedProvinces.includes(province)"
+            [class.selected-chip]="filterState.selectedProvinces.includes(province)"
+            (click)="onProvinceChange(province)">
             <ion-label>{{ province }}</ion-label>
-            <ion-badge *ngIf="filterState.selectedProvince !== province" color="light">{{ (provinceCounts$ |
-              async)?.get(province) || 0 }}</ion-badge>
+            <ion-badge>{{ (provinceCounts$ | async)?.get(province) || 0 }}</ion-badge>
           </ion-chip>
         </div>
       </div>
@@ -94,26 +101,22 @@
         <span>Filter by Product</span>
         <div class="product-filter-toggle">
           <ion-button size="small" [fill]="filterState.productFilterMode === 'has' ? 'solid' : 'outline'"
-            [color]="filterState.productFilterMode === 'has' ? 'light' : 'medium'"
             (click)="onProductFilterModeChange('has')">
             Has Product
           </ion-button>
           <ion-button size="small" [fill]="filterState.productFilterMode === 'doesntHave' ? 'solid' : 'outline'"
-            [color]="filterState.productFilterMode === 'doesntHave' ? 'light' : 'medium'"
             (click)="onProductFilterModeChange('doesntHave')">
             Doesn't Have
           </ion-button>
         </div>
       </div>
       <div class="filter-content">
-        <div class="chip-container">
+        <div class="chip-grid">
           <ion-chip *ngFor="let product of products$ | async"
             [outline]="!filterState.selectedProducts.includes(product)"
-            [color]="filterState.selectedProducts.includes(product) ? 'primary' : 'medium'"
-            (click)="onProductChange(product)">
+            [class.selected-chip]="filterState.selectedProducts.includes(product)" (click)="onProductChange(product)">
             <ion-label>{{ product }}</ion-label>
-            <ion-badge *ngIf="!filterState.selectedProducts.includes(product)" color="light">{{ (productCounts$ |
-              async)?.get(product) || 0 }}</ion-badge>
+            <ion-badge>{{ (productCounts$ | async)?.get(product) || 0 }}</ion-badge>
           </ion-chip>
         </div>
       </div>
@@ -126,21 +129,34 @@
         <ion-icon [name]="showFeedsFilter ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
       </div>
       <div class="filter-content" *ngIf="showFeedsFilter">
-        <div class="chip-container">
+        <div class="chip-grid">
           <ion-chip *ngFor="let feed of feeds$ | async" [outline]="!filterState.selectedFeeds.includes(feed)"
-            [color]="filterState.selectedFeeds.includes(feed) ? 'primary' : 'medium'" (click)="onFeedChange(feed)">
+            [class.selected-chip]="filterState.selectedFeeds.includes(feed)" (click)="onFeedChange(feed)">
             <ion-label>{{ feed }}</ion-label>
-            <ion-badge *ngIf="!filterState.selectedFeeds.includes(feed)" color="light">{{ (feedCounts$ |
-              async)?.get(feed) || 0 }}</ion-badge>
+            <ion-badge>{{ (feedCounts$ | async)?.get(feed) || 0 }}</ion-badge>
           </ion-chip>
         </div>
       </div>
     </div>
 
+  </div> <!-- CLOSE filter-section HERE -->
+
+
+  <!-- Client Details Section Header -->
+  <div class="section-title">
+    <h2>Client Details</h2>
+    <span class="client-count">{{ (filteredCompanies$ | async)?.length || 0 }} clients</span>
   </div>
 
-  <!-- Client List -->
-  <h3 class="list-title">Customer Details</h3>
+  <!-- Duplicate Search Bar -->
+  <ion-searchbar placeholder="name, province, city, suburb, manager..." [value]="filterState.searchTerm"
+    (ionChange)="onSearchChange($event)" class="custom-searchbar duplicate-searchbar">
+  </ion-searchbar>
+
+  <!-- Add this temporarily below the search bar to see if it's updating -->
+  <div>Current search: {{ filterState.searchTerm }}</div>
+
+  <!-- Client List - NOW OUTSIDE filter-section -->
   <div class="client-list">
     <div class="client-card" *ngFor="let company of filteredCompanies$ | async">
       <div class="card-header" (click)="toggleCard(company.companyId)">
@@ -161,65 +177,67 @@
       <div class="card-body" *ngIf="isCardExpanded(company.companyId)">
         <ion-card-content>
 
-          <!-- Client Details -->
-          <div class="section-header">Client Details</div>
-          <div class="info-list">
-            <div class="info-item">
+          <!-- Client Details Section -->
+          <div class="section-header green-header">Client Details</div>
+          <div class="detail-grid">
+            <div class="detail-item">
               <span class="label">Manager:</span>
               <span class="value">{{ company.accountManager }}</span>
             </div>
-            <div class="info-item">
+            <div class="detail-item">
               <span class="label">Start Date:</span>
               <span class="value">{{ company.startDate | date:'d MMMM yyyy' }}</span>
             </div>
-            <div class="info-item">
+            <div class="detail-item">
               <span class="label">Last Visit:</span>
               <span class="value">{{ company.lastSiteVisit | date:'d MMMM yyyy' }}</span>
             </div>
-            <div class="info-item">
+            <div class="detail-item">
               <span class="label">Payment:</span>
               <span class="value">{{ company.paymentMethod }}</span>
             </div>
-            <div class="info-item">
+            <div class="detail-item">
               <span class="label">Company ID:</span>
               <span class="value">{{ company.companyId }}</span>
             </div>
-            <div class="info-item">
+            <div class="detail-item">
               <span class="label">Last Invoice:</span>
               <span class="value">{{ company.lastInvoiceAmount | currency:'ZAR':'symbol-narrow':'1.2-2' }}</span>
             </div>
-            <div class="info-item">
+            <div class="detail-item full-width">
               <span class="label">Location:</span>
-              <span class="value location-link">
+              <span class="value location-link" (click)="openMap(company)">
                 <ion-icon name="location-outline"></ion-icon> View on Map
               </span>
             </div>
           </div>
 
-          <!-- Active Products -->
-          <div class="section-header">Active Products</div>
-          <div class="check-list">
-            <div class="check-item" *ngFor="let product of company.products | keyvalue">
-              <ng-container *ngIf="product.value">
-                <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
-                <span>{{ product.key }}</span>
-              </ng-container>
+          <!-- Active Products Section -->
+          <div class="section-header green-header">Active Products</div>
+          <div class="checkbox-list">
+            <div class="checkbox-item" *ngFor="let product of getActiveProducts(company)">
+              <ion-icon name="checkmark-circle" class="check-icon"></ion-icon>
+              <span>{{ product }}</span>
+            </div>
+            <div class="no-data" *ngIf="getActiveProducts(company).length === 0">
+              No active products.
             </div>
           </div>
 
-          <!-- Active Feeds -->
-          <div class="section-header">Active Feeds</div>
-          <div class="check-list">
-            <div class="check-item" *ngFor="let feed of company.feeds | keyvalue">
-              <ng-container *ngIf="feed.value">
-                <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
-                <span>{{ feed.key }}</span>
-              </ng-container>
+          <!-- Active Feeds Section -->
+          <div class="section-header green-header">Active Feeds</div>
+          <div class="checkbox-list">
+            <div class="checkbox-item" *ngFor="let feed of getActiveFeeds(company)">
+              <ion-icon name="checkmark-circle" class="check-icon"></ion-icon>
+              <span>{{ feed }}</span>
+            </div>
+            <div class="no-data" *ngIf="getActiveFeeds(company).length === 0">
+              No active feeds.
             </div>
           </div>
 
-          <!-- DB Info -->
-          <div class="section-header">DB Info</div>
+          <!-- DB Info Section -->
+          <div class="section-header green-header">DB Info</div>
           <div class="db-info-list">
             <div class="db-card" *ngFor="let db of company.dbInfo">
               <div class="db-row">
@@ -228,7 +246,7 @@
               </div>
               <div class="db-row">
                 <span class="label">Install Date:</span>
-                <span class="value">{{ db.installDate | date:'MMM d yyyy h:mm:ss:a' }}</span>
+                <span class="value">{{ db.dbInstallDate | date:'d MMMM yyyy' }}</span>
               </div>
             </div>
             <div class="no-data" *ngIf="!company.dbInfo?.length">
@@ -236,17 +254,17 @@
             </div>
           </div>
 
-          <!-- Activity -->
-          <div class="section-header">Activity Last 120 Days</div>
+          <!-- Activity Section -->
+          <div class="section-header green-header">Recent Activity</div>
           <div class="activity-list">
             <div class="activity-item" *ngFor="let act of company.activity">
               <div class="item-header">
-                <span class="ticket-id">Ticket: {{ act.activityId }}</span>
-                <span class="staff-name">By: {{ act.performedBy }}</span>
-                <span class="date">{{ act.date | date:'MMM d yyyy h:mm:ss:a' }}</span>
+                <span class="ticket-id">Ticket: {{ act.id }}</span>
+                <span class="staff-name">BY: {{ act.staffMember }}</span>
+                <span class="date">{{ act.date | date:'MMM d yyyy h:mm:ss a' }}</span>
               </div>
               <div class="item-content">
-                {{ act.notes || act.description }}
+                {{ act.notes }}
               </div>
             </div>
             <div class="no-data" *ngIf="!company.activity?.length">
@@ -256,7 +274,3 @@
 
         </ion-card-content>
       </div>
-    </div>
-  </div>
-
-</ion-content>

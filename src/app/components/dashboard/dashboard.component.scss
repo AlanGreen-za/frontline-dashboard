@@ -1,5 +1,5 @@
 ion-content {
-  --background: #f8f9fa;
+  --background: #e7e7e7;
 }
 
 // Header
@@ -13,6 +13,54 @@ ion-toolbar {
     font-size: 1.2rem;
     color: #222428;
   }
+}
+
+// Header icon styles
+.header-logo {
+  height: 32px;
+  width: auto;
+  margin-left: 12px;
+  cursor: pointer;
+}
+
+.header-icon {
+  height: 24px;
+  width: 24px;
+  filter: grayscale(100%); // Optional: makes icons grayscale
+  transition: all 0.2s ease;
+
+  &:hover {
+    opacity: 0.7;
+  }
+}
+
+// Search Bar Styling
+ion-searchbar {
+  --background: white;
+  --color: #333;
+  --placeholder-color: #999;
+  --icon-color: #999;
+  --border-radius: 8px;
+  --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  &.custom-searchbar {
+    margin: 16px 0;
+    padding: 0;
+
+    .searchbar-input-container {
+      background: white !important;
+    }
+
+    input {
+      background: white !important;
+      color: #333 !important;
+    }
+  }
+}
+
+// Optional: Style the last button (logout) differently
+ion-button:last-child .header-icon {
+  filter: none; // Keep logout icon in original color if needed
 }
 
 // Filter Section
@@ -41,31 +89,43 @@ ion-toolbar {
 
       .product-filter-toggle {
         display: flex;
-        gap: 4px;
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 4px;
-        padding: 2px;
+        gap: 0;
+        background: transparent;
+        border-radius: 0;
+        padding: 0;
 
         ion-button {
-          --padding-start: 16px;
-          --padding-end: 16px;
+          --padding-start: 12px;
+          --padding-end: 12px;
+          --padding-top: 4px;
+          --padding-bottom: 4px;
           height: 28px;
           font-size: 0.85rem;
-          font-weight: 500;
           margin: 0;
           text-transform: none;
+          font-weight: 500;
+          --border-radius: 0;
+          --box-shadow: none;
+
+          &:first-child {
+            --border-radius: 4px 0 0 4px;
+          }
+
+          &:last-child {
+            --border-radius: 0 4px 4px 0;
+          }
 
           &[fill="solid"] {
             --background: white;
             --color: #333;
-            --border-radius: 3px;
           }
 
           &[fill="outline"] {
             --background: transparent;
             --color: white;
-            --border-color: transparent;
-            --border-radius: 3px;
+            --border-width: 1px;
+            --border-style: solid;
+            --border-color: white;
           }
         }
       }
@@ -73,18 +133,22 @@ ion-toolbar {
 
     &.feeds-filter-header {
       background-color: #8BC34A;
+      cursor: pointer;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      cursor: pointer;
 
       ion-icon {
+        color: white;
         font-size: 1.2rem;
       }
     }
   }
 
+  // This closes .filter-header
+
   .filter-content {
+    // This should be at the same level as .filter-header, not inside it
     background-color: white;
     padding: 16px;
     border: 1px solid #e0e0e0;
@@ -94,137 +158,75 @@ ion-toolbar {
   }
 }
 
-// Chips
-.chip-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 8px;
-  padding: 4px;
-}
+// This closes .filter-group
 
-ion-chip {
-  --background: white;
-  --border-radius: 2px;
-  border: 1px solid #e0e0e0;
-  margin: 0;
-  height: 36px;
-  width: 100%;
-  padding: 0 12px;
+
+//CLIENT CARD SECTION
+
+// Section Title Styling
+.section-title {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  font-size: 0.9rem;
-  box-sizing: border-box;
+  align-items: center;
+  margin: 44px 0 12px 0; // More top margin, less bottom since search bar follows
+  padding: 0 4px;
 
-  ion-label {
+  h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #333;
     margin: 0;
-    margin-right: 8px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: #444;
-    text-transform: capitalize;
   }
 
-  ion-badge {
-    margin: 0;
-    min-width: 24px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.75rem;
-    font-weight: 600;
-    background: #f0f0f0;
+  .client-count {
+    font-size: 0.95rem;
     color: #666;
-    border-radius: 10px;
-  }
-
-  &[outline="false"] {
-    --background: var(--ion-color-primary);
-    --color: white;
-    border-color: var(--ion-color-primary);
-
-    ion-label {
-      color: white;
-    }
-
-    ion-badge {
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-    }
-  }
-}
-
-// Segment
-ion-segment {
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  background: white;
-
-  ion-segment-button {
-    --color: var(--ion-color-dark);
-    --color-checked: var(--ion-color-dark);
-    --indicator-color: #e0e0e0;
     font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
   }
 }
 
-// Search Bar
-.custom-searchbar {
-  --background: white;
-  --box-shadow: none;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  padding: 0;
-  margin-bottom: 24px;
-
-  .searchbar-input-container {
-    input {
-      font-size: 0.95rem;
-    }
-  }
+// Adjust duplicate search bar margin
+ion-searchbar.duplicate-searchbar {
+  margin-top: 0; // No top margin since header is above
+  margin-bottom: 30px;
 }
 
-// Client Cards
-.list-title {
-  margin: 0 0 12px 4px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #222428;
-}
-
+// Client List - Now properly at root level
 .client-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 16px;
 }
 
 .client-card {
-  margin: 0;
+  background: white;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border: 1px solid #f0f0f0;
-  background: white;
-  transition: all 0.2s ease;
   overflow: hidden;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
 
   &:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+  }
+
+  &.expanded {
+    border-color: var(--ion-color-primary);
   }
 
   .card-header {
     padding: 16px;
-    cursor: pointer;
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
+    cursor: pointer;
     background: white;
+    border-bottom: 1px solid transparent;
+
+    &:hover {
+      background: #f9f9f9;
+    }
 
     .header-content {
       flex: 1;
@@ -232,32 +234,40 @@ ion-segment {
       .trading-name {
         font-size: 1.1rem;
         font-weight: 700;
-        color: #222428;
+        color: #333;
         margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
 
         &.overdue {
           color: var(--ion-color-danger);
+
+          &::after {
+            content: 'OVERDUE';
+            font-size: 0.7rem;
+            background: var(--ion-color-danger);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            vertical-align: middle;
+          }
         }
       }
 
       .subtitle {
-        font-size: 0.85rem;
+        font-size: 0.7rem;
         color: #666;
-        font-weight: 400;
       }
     }
 
     .expand-icon {
-      margin-left: 12px;
-      display: flex;
-      align-items: center;
-      height: 100%;
-      padding-top: 2px;
+      color: #999;
+      transition: transform 0.3s ease;
 
       ion-icon {
-        font-size: 1.2rem;
-        color: var(--ion-color-medium);
-        transition: transform 0.3s ease;
+        font-size: 1.5rem;
 
         &.rotated {
           transform: rotate(180deg);
@@ -267,163 +277,201 @@ ion-segment {
   }
 
   .card-body {
-    border-top: 1px solid #f0f0f0;
+    border-top: none;
     animation: slideDown 0.3s ease-out;
 
     ion-card-content {
-      padding: 16px;
-      background: #ffffff;
+      padding: 0;
+    }
 
-      .section-header {
-        background-color: #8BC34A; // Green color from screenshot
+    .section-header {
+      &.green-header {
+        background: #8BC34A;
         color: white;
-        padding: 10px 16px;
+        font-size: 0.9rem;
         font-weight: 600;
-        font-size: 0.95rem;
-        border-radius: 6px;
-        margin-bottom: 12px;
-        margin-top: 16px;
+        padding: 10px 10px;
+        margin: 10px;
+        border: none;
+        text-transform: none;
+        letter-spacing: normal;
+        border-radius: 4px 4px 4px 4px;
+      }
+    }
 
-        &:first-child {
-          margin-top: 0;
-        }
+    .detail-grid {
+      background: white;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+
+      // Mobile view - single column
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+        gap: 8px;
       }
 
-      .info-list {
-        margin-bottom: 8px;
+      .detail-item {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.9rem;
 
-        .info-item {
+        &.full-width {
+          grid-column: 1 / -1;
+        }
+
+        // On mobile, full-width doesn't need special treatment
+        @media (max-width: 768px) {
+          &.full-width {
+            grid-column: auto;
+          }
+        }
+
+        .label {
+          color: #666;
+          font-weight: 500;
+        }
+
+        .value {
+          color: #222;
+          text-align: right;
+
+          &.location-link {
+            color: #8BC34A;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+
+            ion-icon {
+              font-size: 1rem;
+            }
+          }
+        }
+      }
+    }
+
+    .checkbox-list {
+      background: white;
+      padding: 16px;
+
+      .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px;
+        margin-bottom: 4px;
+        background: #f9f9f9;
+        border-radius: 4px;
+        font-size: 0.9rem;
+
+        ion-icon.check-icon {
+          font-size: 1.2rem;
+          color: #8BC34A;
+        }
+
+        span {
+          color: #333;
+        }
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+
+    // Close .checkbox-list here
+
+    .db-info-list {
+      // This should be at the same level as .checkbox-list
+      background: white;
+      padding: 16px;
+
+      .db-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 12px;
+        margin-bottom: 8px;
+        background: #fff;
+
+        .db-row {
           display: flex;
           justify-content: space-between;
-          margin-bottom: 8px;
-          font-size: 0.9rem;
-          line-height: 1.4;
-
-          .label {
-            color: #555;
-            font-weight: 500;
-          }
-
-          .value {
-            color: #222;
-            font-weight: 500;
-            text-align: right;
-
-            &.location-link {
-              color: #8BC34A;
-              display: flex;
-              align-items: center;
-              gap: 4px;
-              justify-content: flex-end;
-              cursor: pointer;
-            }
-          }
-        }
-      }
-
-      .check-list {
-        margin-bottom: 8px;
-
-        .check-item {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          margin-bottom: 8px;
-          font-size: 0.9rem;
-          color: #333;
-
-          ion-icon {
-            font-size: 1.1rem;
-            color: #8BC34A; // Match header green
-          }
-        }
-      }
-
-      .db-info-list {
-        .db-card {
-          border: 1px solid #e0e0e0;
-          border-radius: 6px;
-          padding: 12px;
-          margin-bottom: 8px;
-          background: #fff;
-
-          .db-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 6px;
-            font-size: 0.85rem;
-
-            &:last-child {
-              margin-bottom: 0;
-            }
-
-            .label {
-              color: #666;
-            }
-
-            .value {
-              color: #333;
-              font-weight: 500;
-              text-align: right;
-              max-width: 60%;
-              word-break: break-word;
-            }
-          }
-        }
-      }
-
-      .activity-list {
-        .activity-item {
-          margin-bottom: 16px;
+          margin-bottom: 6px;
+          font-size: 0.85rem;
 
           &:last-child {
             margin-bottom: 0;
           }
 
-          .item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
-            font-size: 0.85rem;
-            color: #555;
-            padding: 0 4px;
-
-            .ticket-id {
-              font-weight: 500;
-            }
-
-            .staff-name {
-              font-weight: 500;
-              text-transform: uppercase;
-            }
-
-            .date {
-              color: #777;
-            }
+          .label {
+            color: #666;
           }
 
-          .item-content {
-            background: #fcfcfc;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            padding: 12px;
-            font-size: 0.9rem;
+          .value {
             color: #333;
-            line-height: 1.5;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+            font-weight: 500;
+            // ... rest of value styles
           }
         }
       }
+    }
 
-      .no-data {
-        padding: 16px;
-        text-align: center;
-        color: #888;
-        font-size: 0.9rem;
-        background: #f9f9f9;
-        border-radius: 6px;
+    .activity-list {
+      background: white;
+      padding: 16px;
+
+      .activity-item {
+        margin-bottom: 16px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .item-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 6px;
+          font-size: 0.85rem;
+          color: #555;
+          padding: 0 4px;
+
+          .ticket-id {
+            font-weight: 500;
+          }
+
+          .staff-name {
+            font-weight: 500;
+            text-transform: uppercase;
+          }
+
+          .date {
+            color: #777;
+          }
+        }
+
+        .item-content {
+          background: #fcfcfc;
+          border: 1px solid #e0e0e0;
+          border-radius: 6px;
+          padding: 12px;
+          font-size: 0.9rem;
+          color: #333;
+          line-height: 1.5;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
       }
+    }
+
+    .no-data {
+      padding: 16px;
+      text-align: center;
+      color: #888;
+      font-size: 0.9rem;
+      background: #f9f9f9;
+      border-radius: 6px;
     }
   }
 }
@@ -485,21 +533,150 @@ ion-segment {
   display: none;
 }
 
-.province-chips {
+// Responsive Grid Layout (5 columns as per design)
+.chip-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+
+  // Responsive adjustments
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  @media (max-width: 992px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+}
+
+// Global Chip Styling
+ion-chip {
+  --background: white;
+  --border-radius: 4px !important; // Force the CSS variable
+  --color: #444;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px !important; // Force the actual CSS property
+  margin: 0;
+  height: 42px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+  background: white;
+  color: #444;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  ion-label {
+    margin: 0;
+    margin-right: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #444;
+    text-transform: capitalize;
+    flex: 1;
+    text-align: left;
+  }
+
+  ion-badge {
+    margin: 0;
+    min-width: 28px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #8BC34A; // Changed from #f0f0f0 to green
+    color: white; // Changed from #666 to white for better contrast
+    border-radius: 20px; // Changed from 12px to match chip border radius
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Selected chips - use class
+ion-chip.selected-chip {
+  --background: #8BC34A;
+  --color: white;
+  background: #8BC34A;
+  border-color: #8BC34A;
+  color: white;
+
+  ion-label {
+    color: white;
+  }
+
+  ion-badge {
+    background: white;
+    color: #8BC34A;
+  }
+}
+
+// Region Filter Specific Styling
+.region-filter-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 12px;
+  margin-bottom: 16px;
 
-  ion-chip {
-    margin: 0;
-    width: 100%;
-    justify-content: center;
+  .region-toggle {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    height: 48px;
 
-    &.selected-chip {
-      --background: var(--ion-color-primary);
-      --color: white;
+    .label {
+      font-weight: 600;
+      color: #444;
+      text-transform: uppercase;
+      font-size: 0.95rem;
+    }
 
-      ion-label {
+    .count {
+      background: #f0f0f0;
+      color: #666;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    &:hover {
+      background: #f9f9f9;
+    }
+
+    &.selected {
+      background: #8BC34A;
+      border-color: #8BC34A;
+
+      .label {
+        color: white;
+      }
+
+      .count {
+        background: rgba(255, 255, 255, 0.2);
         color: white;
       }
     }

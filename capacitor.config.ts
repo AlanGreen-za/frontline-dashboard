@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
-  appName: 'frontline-dashboard',
+  appId: 'co.za.vmgsoftware.frontman',
+  appName: 'VMG FRONTMAN',
   webDir: 'www'
 };
 
