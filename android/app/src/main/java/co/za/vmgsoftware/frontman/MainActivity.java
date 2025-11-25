@@ -1,4 +1,4 @@
-package io.ionic.starter;
+package co.za.vmgsoftware.frontman;
 
 import com.getcapacitor.BridgeActivity;
 
