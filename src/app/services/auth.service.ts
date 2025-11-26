@@ -10,23 +10,20 @@ import { environment } from 'src/environments/environment';
 })
 export class AuthService {
   public IsInternal: boolean = true;
-
+  private tokenKey = 'auth_token';
+  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
+  public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
   private get baseUrl(): string {
-    console.log("this.IsInternal", this.IsInternal);
-    
     return this.IsInternal ? environment.internalBaseUrl : environment.externalBaseUrl;
   }
 
   private get apiUrl(): string {
     return `${this.baseUrl}/Auth/Login`;
   }
-  private tokenKey = 'auth_token';
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
 
-  public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
-  constructor(private http: HttpClient) {
+constructor(private http: HttpClient) {
     this.checkAuthStatus();
   }
 

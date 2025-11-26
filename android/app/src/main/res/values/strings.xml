@@ -4,4 +4,5 @@
     <string name="title_activity_main">VMG FRONTMAN</string>
     <string name="package_name">co.za.vmgsoftware.frontman</string>
     <string name="custom_url_scheme">co.za.vmgsoftware.frontman</string>
+    <string name="google_maps_key">AIzaSyCHo536hzNRUgM__dLSZnStuJWzhAuJ8zs</string>
 </resources>

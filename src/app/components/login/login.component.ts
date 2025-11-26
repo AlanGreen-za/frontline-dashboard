@@ -1,18 +1,39 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IonicModule, LoadingController, AlertController } from '@ionic/angular';
+import { LoadingController, AlertController } from '@ionic/angular';
 import { AuthService } from '../../services/auth.service';
 import { LoginRequest } from '../../interfaces/frontline.interface';
+import {
+  IonButton,
+  IonCard, IonCardContent,
+  IonContent, IonIcon,
+  IonImg,
+  IonInput,
+  IonInputPasswordToggle,
+  IonLabel,
+  IonToggle
+} from "@ionic/angular/standalone";
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, ReactiveFormsModule],
-  providers: [AuthService]  // Add this line
+  imports: [
+    IonContent,
+    IonImg,
+    IonCard,
+    ReactiveFormsModule,
+    IonInput,
+    IonInputPasswordToggle,
+    IonLabel,
+    IonToggle,
+    IonButton,
+    IonIcon,
+    IonCardContent
+  ],
+  providers: [AuthService]
 })
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;
@@ -37,8 +58,7 @@ export class LoginComponent implements OnInit {
       if (isAuth) {
         this.router.navigate(['/dashboard']);
       }
-    })
-    );
+    }));
   }
 
   protected toggleConnectionMode() {
