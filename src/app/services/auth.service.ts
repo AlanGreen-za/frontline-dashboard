@@ -19,7 +19,7 @@ export class AuthService {
   }
 
   private get apiUrl(): string {
-    return `${this.baseUrl}/Auth/Login`;
+    return `${this.baseUrl}/auth/login`;
   }
 
 

@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   googleMapsApiKey: 'AIzaSyCHo536hzNRUgM__dLSZnStuJWzhAuJ8zs',
-  internalBaseUrl: 'http://192.168.1.13:10011',
+  internalBaseUrl: 'https://192.168.1.13:10011',
   externalBaseUrl: 'https://office.vmgsoftware.co.za:10011'
 
 };
