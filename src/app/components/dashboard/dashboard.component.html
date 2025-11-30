@@ -21,9 +21,9 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding" [fullscreen]="true">
+<ion-content class="ion-padding">
 
-  <!-- Top Search Bar -->
+  <!-- Search Bar -->
   <ion-searchbar placeholder="name, province, city, suburb, manager..." [value]="filterState.searchTerm"
     (ionChange)="onSearchChange($event)" class="custom-searchbar duplicate-searchbar">
   </ion-searchbar>
@@ -148,17 +148,9 @@
     <span class="client-count">{{ (filteredCompanies$ | async)?.length || 0 }} clients</span>
   </div>
 
-  <!-- Client Search Bar 
+  <!-- Duplicate Search Bar -->
   <ion-searchbar placeholder="name, province, city, suburb, manager..." [value]="filterState.searchTerm"
     (ionChange)="onSearchChange($event)" class="custom-searchbar duplicate-searchbar">
-  </ion-searchbar> 
-  -->
-  
-  <ion-searchbar 
-    placeholder="name, province, city, suburb, manager..." 
-    [value]="filterState.searchTerm"
-    (ionInput)="onSearchChange($event)" 
-    class="custom-searchbar duplicate-searchbar">
   </ion-searchbar>
 
   <!-- Add this temporarily below the search bar to see if it's updating -->

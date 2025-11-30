@@ -476,13 +476,6 @@ export class DashboardComponent implements OnInit {
   }
 
   // Event Handlers
-  // onSearchChange(event: any) {
-  //  const searchValue = event.detail.value || '';
-  //  console.log('Search value:', searchValue);
-  //  this.filterState.searchTerm = searchValue;
-  //  this.filterStateSubject.next({ ...this.filterState });
-  //}
-
   onSearchChange(event: any) {
     const searchValue = event.detail.value || '';
     console.log('Search value:', searchValue);

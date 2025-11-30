@@ -9,17 +9,16 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class AuthService {
-  public IsInternal: boolean = true;
   private tokenKey = 'auth_token';
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
   private get baseUrl(): string {
-    return this.IsInternal ? environment.internalBaseUrl : environment.externalBaseUrl;
+    return environment.baseUrl;
   }
 
   private get apiUrl(): string {
-    return `${this.baseUrl}/auth/login`;
+    return `${this.baseUrl}/Auth/Login`;
   }
 
 

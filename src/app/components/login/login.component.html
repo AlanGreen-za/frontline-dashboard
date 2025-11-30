@@ -32,13 +32,6 @@
             <span *ngIf="password?.errors?.['minlength']">Password must be at least 4 characters</span>
           </div>
 
-          <div class="location-toggle-container">
-            <ion-label class="toggle-label">In Office</ion-label>
-            <div class="toggle-wrapper">
-              <ion-toggle (click)="toggleConnectionMode()" class="location-toggle"></ion-toggle>
-            </div>
-            <ion-label class="toggle-label">External</ion-label>
-          </div>
 
           <ion-button expand="block" type="submit" [disabled]="loginForm.invalid" class="login-button">
             Login

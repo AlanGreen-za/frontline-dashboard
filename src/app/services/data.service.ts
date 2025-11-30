@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, from, switchMap } from 'rxjs';
 import { AuthService } from './auth.service';
+import {environment} from "../../environments/environment";
 
 export interface ClientData {
     companyId: number;
@@ -26,7 +27,7 @@ export interface ClientData {
     providedIn: 'root'
 })
 export class DataService {
-  private apiUrl = `${this.authService.IsInternal ? 'https://192.168.1.13:10011' : 'https://office.vmgsoftware.co.za:10011'}/Frontline`;
+  private apiUrl = `${environment.baseUrl}/Frontline`;
 
     constructor(private http: HttpClient, private authService: AuthService) { }
 

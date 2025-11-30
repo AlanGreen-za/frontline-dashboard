@@ -1,18 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { LoadingController, AlertController } from '@ionic/angular';
 import { AuthService } from '../../services/auth.service';
 import { LoginRequest } from '../../interfaces/frontline.interface';
+
 import {
   IonButton,
-  IonCard, IonCardContent,
-  IonContent, IonIcon,
+  IonCard,
+  IonCardContent,
+  IonContent,
+  IonIcon,
   IonImg,
   IonInput,
   IonInputPasswordToggle,
-  IonLabel,
-  IonToggle
+  LoadingController,
+  AlertController
 } from "@ionic/angular/standalone";
 
 @Component({
@@ -21,32 +23,29 @@ import {
   styleUrls: ['./login.component.scss'],
   standalone: true,
   imports: [
-    IonContent,
-    IonImg,
-    IonCard,
     ReactiveFormsModule,
-    IonInput,
-    IonInputPasswordToggle,
-    IonLabel,
-    IonToggle,
     IonButton,
+    IonCard,
+    IonCardContent,
+    IonContent,
     IonIcon,
-    IonCardContent
+    IonImg,
+    IonInput,
+    IonInputPasswordToggle
   ],
   providers: [AuthService]
 })
 export class LoginComponent implements OnInit {
-  loginForm: FormGroup;
+  private formBuilder: FormBuilder =  inject(FormBuilder);
+  private authService: AuthService =  inject(AuthService);
+  private router: Router =  inject(Router);
+  private loadingController: LoadingController =  inject(LoadingController);
+  private alertController: AlertController =  inject(AlertController);
+  protected loginForm: FormGroup;
   showPassword = false;
-  IsInternal:boolean = true;
 
-  constructor(
-    private formBuilder: FormBuilder,
-    private authService: AuthService,
-    private router: Router,
-    private loadingController: LoadingController,
-    private alertController: AlertController
-  ) {
+
+  constructor() {
     this.loginForm = this.formBuilder.group({
       username: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(3)]]
@@ -61,9 +60,6 @@ export class LoginComponent implements OnInit {
     }));
   }
 
-  protected toggleConnectionMode() {
-    this.IsInternal = !this.IsInternal;
-  }
 
   async onLogin() {
     if (this.loginForm.invalid) {
@@ -78,7 +74,7 @@ export class LoginComponent implements OnInit {
     await loading.present();
 
     const credentials: LoginRequest = this.loginForm.value;
-    this.authService.IsInternal = this.IsInternal
+
     this.authService.login(credentials).subscribe({
       next: async (response) => {
         await loading.dismiss();
@@ -90,6 +86,7 @@ export class LoginComponent implements OnInit {
       }
     });
   }
+
 
   private async showValidationAlert() {
     const alert = await this.alertController.create({
