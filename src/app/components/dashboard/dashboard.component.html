@@ -24,8 +24,12 @@
 <ion-content class="ion-padding">
 
   <!-- Search Bar -->
-  <ion-searchbar placeholder="name, province, city, suburb, manager..." [value]="filterState.searchTerm"
-    (ionChange)="onSearchChange($event)" class="custom-searchbar duplicate-searchbar">
+  <ion-searchbar
+    placeholder="name, province, city, suburb, manager..."
+    [(ngModel)]="filterState.searchTerm"
+    (ionInput)="onSearchChange($event)"
+    class="custom-searchbar"
+    [debounce]="0">
   </ion-searchbar>
 
   <!-- Map View (Always Visible) -->
@@ -149,12 +153,14 @@
   </div>
 
   <!-- Duplicate Search Bar -->
-  <ion-searchbar placeholder="name, province, city, suburb, manager..." [value]="filterState.searchTerm"
-    (ionChange)="onSearchChange($event)" class="custom-searchbar duplicate-searchbar">
+  <ion-searchbar
+    placeholder="name, province, city, suburb, manager..."
+    [(ngModel)]="filterState.searchTerm"
+    (ionInput)="onSearchChange($event)"
+    class="custom-searchbar duplicate-searchbar"
+    [debounce]="0">
   </ion-searchbar>
 
-  <!-- Add this temporarily below the search bar to see if it's updating -->
-  <div>Current search: {{ filterState.searchTerm }}</div>
 
   <!-- Client List - NOW OUTSIDE filter-section -->
   <div class="client-list">

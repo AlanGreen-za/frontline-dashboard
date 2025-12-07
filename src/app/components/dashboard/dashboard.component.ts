@@ -7,6 +7,9 @@ import { AuthService } from '../../services/auth.service';
 import { ClientData, DataService } from '../../services/data.service';
 import { MapViewComponent } from '../map-view/map-view.component';
 import { Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+
 
 interface FilterState {
   searchTerm: string;
@@ -95,6 +98,8 @@ export class DashboardComponent implements OnInit {
   expandedCards = new Set<number>();
   showMap = false;
   showFeedsFilter = false;
+
+  private searchSubject = new Subject<string>();
 
   constructor(
     private authService: AuthService,
@@ -299,8 +304,58 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     this.loadData();
+
+    // Set up real-time search
+    this.searchSubject.pipe(
+      debounceTime(200), // 200ms delay for performance
+      distinctUntilChanged()
+    ).subscribe(searchTerm => {
+      this.filterState.searchTerm = searchTerm;
+      this.applyFilters();
+    });
   }
 
+  applyFilters() {
+    this.filterStateSubject.next({ ...this.filterState });
+  }
+
+  getProvinceDisplayName(province: string): string {
+  const provinceMap: { [key: string]: string } = {
+    'Kwa Zulu Natal': 'KZN',
+    'KwaZulu-Natal': 'KZN',
+    'KwaZulu Natal': 'KZN',
+    'Eastern Cape': 'E Cape',
+    'Western Cape': 'W Cape',
+    'Northern Cape': 'N Cape',
+    'North West': 'NW',
+    'Free State': 'Free State',
+    'Gauteng': 'Gauteng',
+    'Limpopo': 'Limpopo',
+    'Mpumalanga': 'MPL'
+  };
+  return provinceMap[province] || province;
+}
+
+getManagerDisplayName(manager: string): string {
+  if (manager.length > 8) {
+    return manager.substring(0, 7) + '.';
+  }
+  return manager;
+}
+
+getProductDisplayName(product: string): string {
+  const productMap: { [key: string]: string } = {
+    'DMS Mobile': 'DMS Mob',
+    'DMS Pro': 'DMS Pro',
+    'DMS Lite': 'DMS Lite',
+    'DMS Acc': 'DMS Acc',
+    'Doc Store': 'Doc Store',
+    'Backups': 'Backups',
+    'CRM': 'CRM',
+    'BCD': 'BCD'
+  };
+  return productMap[product] || product;
+}
 
   loadData() {
     this.dataService.getClientData().subscribe({
@@ -343,11 +398,11 @@ export class DashboardComponent implements OnInit {
       if (filters.searchTerm) {
         const term = filters.searchTerm.toLowerCase();
         const matchesSearch =
-          company.tradingName.toLowerCase().includes(term) ||
-          company.accountManager.toLowerCase().includes(term) ||
-          company.city.toLowerCase().includes(term) ||
-          company.suburb.toLowerCase().includes(term) ||
-          company.province.toLowerCase().includes(term);
+          (company.tradingName || '').toLowerCase().includes(term) ||
+          (company.accountManager || '').toLowerCase().includes(term) ||
+          (company.city || '').toLowerCase().includes(term) ||
+          (company.suburb || '').toLowerCase().includes(term) ||
+          (company.province || '').toLowerCase().includes(term);
 
         if (!matchesSearch) return false;
       }
@@ -477,10 +532,8 @@ export class DashboardComponent implements OnInit {
 
   // Event Handlers
   onSearchChange(event: any) {
-    const searchValue = event.detail.value || '';
-    console.log('Search value:', searchValue);
-    this.filterState.searchTerm = searchValue;
-    this.filterStateSubject.next({ ...this.filterState });
+    const searchTerm = event.target.value || '';
+    this.searchSubject.next(searchTerm);
   }
 
   onManagerChange(manager: string) {
