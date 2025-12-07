@@ -242,6 +242,101 @@
             </div>
           </div>
 
+          <!-- DMS Pro Health Score Section -->
+          <div class="health-score-section">
+            <div class="section-header green-header">DMS Pro Health Check</div>
+
+            <!-- Show scores if available -->
+            <div class="health-scores-grid" *ngIf="company.healthScores?.dmsPro">
+
+              <div class="score-item">
+                <span class="score-label">Indicators</span>
+                <div class="score-bar">
+                  <div class="score-fill"
+                       [style.width.%]="((company.healthScores?.dmsPro?.indicatorScore || 0) * 10)"
+                       [class.good]="(company.healthScores?.dmsPro?.indicatorScore || 0) >= 8"
+                       [class.medium]="(company.healthScores?.dmsPro?.indicatorScore || 0) >= 5 && (company.healthScores?.dmsPro?.indicatorScore || 0) < 8"
+                       [class.poor]="(company.healthScores?.dmsPro?.indicatorScore || 0) < 5">
+                  </div>
+                  <span class="score-value">{{ company.healthScores?.dmsPro?.indicatorScore || 0 }}/10</span>
+                </div>
+              </div>
+
+              <div class="score-item">
+                <span class="score-label">Stock Type</span>
+                <div class="score-bar">
+                  <div class="score-fill"
+                       [style.width.%]="((company.healthScores?.dmsPro?.costByStockTypeScore || 0) * 10)"
+                       [class.good]="(company.healthScores?.dmsPro?.costByStockTypeScore || 0) >= 8"
+                       [class.medium]="(company.healthScores?.dmsPro?.costByStockTypeScore || 0) >= 5 && (company.healthScores?.dmsPro?.costByStockTypeScore || 0) < 8"
+                       [class.poor]="(company.healthScores?.dmsPro?.costByStockTypeScore || 0) < 5">
+                  </div>
+                  <span class="score-value">{{ company.healthScores?.dmsPro?.costByStockTypeScore || 0 }}/10</span>
+                </div>
+              </div>
+
+              <div class="score-item">
+                <span class="score-label">Stock List</span>
+                <div class="score-bar">
+                  <div class="score-fill"
+                       [style.width.%]="((company.healthScores?.dmsPro?.stockListScore || 0) * 10)"
+                       [class.good]="(company.healthScores?.dmsPro?.stockListScore || 0) >= 8"
+                       [class.medium]="(company.healthScores?.dmsPro?.stockListScore || 0) >= 5 && (company.healthScores?.dmsPro?.stockListScore || 0) < 8"
+                       [class.poor]="(company.healthScores?.dmsPro?.stockListScore || 0) < 5">
+                  </div>
+                  <span class="score-value">{{ company.healthScores?.dmsPro?.stockListScore || 0 }}/10</span>
+                </div>
+              </div>
+
+              <div class="score-item">
+                <span class="score-label">Profit</span>
+                <div class="score-bar">
+                  <div class="score-fill"
+                       [style.width.%]="((company.healthScores?.dmsPro?.fullProfitScore || 0) * 10)"
+                       [class.good]="(company.healthScores?.dmsPro?.fullProfitScore || 0) >= 8"
+                       [class.medium]="(company.healthScores?.dmsPro?.fullProfitScore || 0) >= 5 && (company.healthScores?.dmsPro?.fullProfitScore || 0) < 8"
+                       [class.poor]="(company.healthScores?.dmsPro?.fullProfitScore || 0) < 5">
+                  </div>
+                  <span class="score-value">{{ company.healthScores?.dmsPro?.fullProfitScore || 0 }}/10</span>
+                </div>
+              </div>
+
+              <div class="score-item">
+                <span class="score-label">Banking</span>
+                <div class="score-bar">
+                  <div class="score-fill"
+                       [style.width.%]="((company.healthScores?.dmsPro?.bankDicScore || 0) * 10)"
+                       [class.good]="(company.healthScores?.dmsPro?.bankDicScore || 0) >= 8"
+                       [class.medium]="(company.healthScores?.dmsPro?.bankDicScore || 0) >= 5 && (company.healthScores?.dmsPro?.bankDicScore || 0) < 8"
+                       [class.poor]="(company.healthScores?.dmsPro?.bankDicScore || 0) < 5">
+                  </div>
+                  <span class="score-value">{{ company.healthScores?.dmsPro?.bankDicScore || 0 }}/10</span>
+                </div>
+              </div>
+
+              <div class="score-item total-score">
+                <span class="score-label"><strong>Total Score</strong></span>
+                <div class="score-bar">
+                  <div class="score-fill"
+                       [style.width.%]="(((company.healthScores?.dmsPro?.totalScore || 0) / (company.healthScores?.dmsPro?.maxScore || 50)) * 100)"
+                       [class.good]="((company.healthScores?.dmsPro?.totalScore || 0) / (company.healthScores?.dmsPro?.maxScore || 50)) >= 0.8"
+                       [class.medium]="((company.healthScores?.dmsPro?.totalScore || 0) / (company.healthScores?.dmsPro?.maxScore || 50)) >= 0.5 && ((company.healthScores?.dmsPro?.totalScore || 0) / (company.healthScores?.dmsPro?.maxScore || 50)) < 0.8"
+                       [class.poor]="((company.healthScores?.dmsPro?.totalScore || 0) / (company.healthScores?.dmsPro?.maxScore || 50)) < 0.5">
+                  </div>
+                  <span class="score-value">{{ company.healthScores?.dmsPro?.totalScore || 0 }}/{{ company.healthScores?.dmsPro?.maxScore || 50 }}</span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Show message when no scores available -->
+            <div class="no-score-message" *ngIf="!company.healthScores?.dmsPro">
+              <ion-icon name="information-circle-outline"></ion-icon>
+              <span>Health check scores not available</span>
+            </div>
+          </div>
+
+
           <!-- DB Info Section -->
           <div class="section-header green-header">DB Info</div>
           <div class="db-info-list">

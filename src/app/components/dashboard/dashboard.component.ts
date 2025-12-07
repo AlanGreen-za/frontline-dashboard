@@ -4,11 +4,12 @@ import { IonicModule, RefresherEventDetail } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { BehaviorSubject, combineLatest, map, Observable, startWith, take, switchMap } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
-import { ClientData, DataService } from '../../services/data.service';
+import { ClientData, HealthScore, DataService } from '../../services/data.service';
 import { MapViewComponent } from '../map-view/map-view.component';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+
 
 
 interface FilterState {
@@ -361,8 +362,28 @@ getProductDisplayName(product: string): string {
     this.dataService.getClientData().subscribe({
       next: (data) => {
         this.companies$.next(data);
+        this.loadHealthScores(); // ADD THIS LINE
       },
       error: (err) => console.error('Error fetching data', err)
+    });
+  }
+
+  loadHealthScores() {
+    const companies = this.companies$.value;
+    companies.forEach(company => {
+      this.dataService.getDmsProScore(company.companyId.toString()).subscribe({
+        next: (score) => {
+          if (!company.healthScores) {
+            company.healthScores = {};
+          }
+          company.healthScores.dmsPro = score;
+          // Update the BehaviorSubject to trigger change detection
+          this.companies$.next([...companies]);
+        },
+        error: (err) => {
+          console.log(`No DMS Pro score for company ${company.companyId}`);
+        }
+      });
     });
   }
 

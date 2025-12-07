@@ -853,6 +853,169 @@ ion-chip.selected-chip {
       }
     }
 
+    // DMS Pro Health Score Styles
+    .health-score-section {
+      margin: 12px 0;
+
+      .section-header {
+        background: #8BC34A;
+        color: white;
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 8px 12px;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .health-scores-grid {
+        background: white;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+
+        .score-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+
+          .score-label {
+            width: 100px;
+            font-size: 0.8rem;
+            color: #666;
+            flex-shrink: 0;
+          }
+
+          .score-bar {
+            flex: 1;
+            height: 24px;
+            background: #f0f0f0;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+
+            .score-fill {
+              height: 100%;
+              transition: width 0.5s ease;
+              border-radius: 12px;
+
+              &.good {
+                background: linear-gradient(90deg, #4CAF50, #66BB6A);
+              }
+
+              &.medium {
+                background: linear-gradient(90deg, #FFC107, #FFD54F);
+              }
+
+              &.poor {
+                background: linear-gradient(90deg, #F44336, #EF5350);
+              }
+            }
+
+            .score-value {
+              position: absolute;
+              right: 8px;
+              top: 50%;
+              transform: translateY(-50%);
+              font-size: 0.7rem;
+              font-weight: 600;
+              color: #333;
+              background: rgba(255,255,255,0.8);
+              padding: 2px 6px;
+              border-radius: 8px;
+            }
+          }
+
+          &.total-score {
+            margin-top: 8px;
+            padding-top: 12px;
+            border-top: 2px solid #e0e0e0;
+
+            .score-label {
+              font-weight: 600;
+              color: #333;
+            }
+
+            .score-bar {
+              height: 28px;
+
+              .score-value {
+                font-size: 0.75rem;
+                font-weight: 700;
+              }
+            }
+          }
+        }
+      }
+
+      // Move no-score-message outside of health-scores-grid
+      .no-score-message {
+        background: white;
+        padding: 20px;
+        text-align: center;
+        color: #666;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+
+        ion-icon {
+          font-size: 1.2rem;
+          color: #999;
+        }
+      }
+
+      // Mobile optimizations
+      @media (max-width: 480px) {
+        .health-scores-grid {
+          padding: 10px;
+
+          .score-item {
+            .score-label {
+              width: 80px;
+              font-size: 0.75rem;
+            }
+
+            .score-bar {
+              height: 22px;
+
+              .score-value {
+                font-size: 0.65rem;
+                padding: 1px 4px;
+              }
+            }
+          }
+        }
+      }
+    }
+
+      // Mobile optimizations
+      @media (max-width: 480px) {
+        .health-scores-grid {
+          padding: 10px;
+
+          .score-item {
+            .score-label {
+              width: 80px;
+              font-size: 0.75rem;
+            }
+
+            .score-bar {
+              height: 22px;
+
+              .score-value {
+                font-size: 0.65rem;
+                padding: 1px 4px;
+              }
+            }
+          }
+        }
+      }
+    }
+
     .activity-list {
       background: white;
       padding: 12px;
